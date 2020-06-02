@@ -1,0 +1,9 @@
+rm output.txt
+for file in simple_programs/*.x
+do
+	cat $file > simple_programs/program.x
+	echo "${file##*/}" >> output.txt
+	./memory_testbench >> output.txt
+	echo "$file"
+done
+

@@ -1,0 +1,128 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Tue Jun 02 00:53:31 2020
+[*]
+[dumpfile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD2\TB_fetch_decode.vcd"
+[dumpfile_mtime] "Tue Jun 02 00:43:24 2020"
+[dumpfile_size] 26480
+[savefile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD2\wave.gtkw"
+[timestart] 0
+[size] 2560 1377
+[pos] -1 -1
+*-2.000000 0 5 15 25 35 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dut.
+[sst_width] 197
+[signals_width] 194
+[sst_expanded] 1
+[sst_vpaned_height] 344
+@28
+dut.clk
+@22
+dut.PC[31:0]
+dut.next_PC[31:0]
+@200
+-
+-
+-
+-
+@28
+dut.funct3[2:0]
+dut.funct7[6:0]
+@22
+dut.i_mem_out[31:0]
+@c00022
+dut.instruction[31:0]
+@28
+(0)dut.instruction[31:0]
+(1)dut.instruction[31:0]
+(2)dut.instruction[31:0]
+(3)dut.instruction[31:0]
+(4)dut.instruction[31:0]
+(5)dut.instruction[31:0]
+(6)dut.instruction[31:0]
+(7)dut.instruction[31:0]
+(8)dut.instruction[31:0]
+(9)dut.instruction[31:0]
+(10)dut.instruction[31:0]
+(11)dut.instruction[31:0]
+(12)dut.instruction[31:0]
+(13)dut.instruction[31:0]
+(14)dut.instruction[31:0]
+(15)dut.instruction[31:0]
+(16)dut.instruction[31:0]
+(17)dut.instruction[31:0]
+(18)dut.instruction[31:0]
+(19)dut.instruction[31:0]
+(20)dut.instruction[31:0]
+(21)dut.instruction[31:0]
+(22)dut.instruction[31:0]
+(23)dut.instruction[31:0]
+(24)dut.instruction[31:0]
+(25)dut.instruction[31:0]
+(26)dut.instruction[31:0]
+(27)dut.instruction[31:0]
+(28)dut.instruction[31:0]
+(29)dut.instruction[31:0]
+(30)dut.instruction[31:0]
+(31)dut.instruction[31:0]
+@1401200
+-group_end
+@200
+-
+-
+-
+-
+-
+@28
+dut.opcode[6:0]
+@200
+-Immediate
+@420
+dut.imm[31:0]
+@28
+dut.imm_e
+@200
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-RD
+@24
+dut.rd[4:0]
+@28
+dut.rd_en
+@200
+-
+-
+-
+-
+-
+-
+-
+-
+-RS1
+@22
+dut.rs1[4:0]
+@28
+dut.rs1_en
+@200
+-
+-
+-
+-
+-
+-
+-
+-
+-RS2
+@25
+dut.rs2[4:0]
+@28
+dut.rs2_en
+[pattern_trace] 1
+[pattern_trace] 0
