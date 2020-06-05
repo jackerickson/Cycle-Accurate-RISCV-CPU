@@ -56,6 +56,7 @@ begin
         data_out[23:16] <= mem[address + 2];
         data_out[31:24] <= mem[address + 3];
     end
+    else data_out <= data_out;
 end
 
 // Writes Sequential
