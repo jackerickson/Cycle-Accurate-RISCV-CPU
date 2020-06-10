@@ -1,5 +1,7 @@
 `define mem_size 1048576 //Bytes
-`define source "components/simple_programs/SumArray.x" //Binary file to load Memory from
+// `define source "components/simple_programs/SumArray.x" //Binary file to load Memory from
+`define source "components/individual-instructions/rv32ui-p-blt.x" 
+//`define source "program.x" 
 `define start_address 32'h01000000
 
 module memory(

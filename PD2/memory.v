@@ -1,5 +1,6 @@
 `define mem_size 1048576 //Bytes
 `define source "simple_programs/SumArray.x" //Binary file to load Memory from
+
 `define start_address 32'h01000000
 
 module memory(
@@ -42,8 +43,6 @@ initial begin
 end
 
 
-
-        
 
 
 // Reads Combinational

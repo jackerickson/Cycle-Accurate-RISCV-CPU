@@ -1,4 +1,4 @@
-`define LUI     7'b01101_11      // lui   rd,imm[31:12]
+`define LUI     7'b0110111      // lui   rd,imm[31:12]    // lui   rd,imm[31:12]
 `define AUIPC   7'b00101_11      // auipc rd,imm[31:12]
 `define JAL     7'b11011_11      // jal   rd,imm[xxxxx]
 `define JALR    7'b11001_11      // jalr  rd,rs1,imm[11:0] 
@@ -14,17 +14,21 @@
 
 
 
-
 //ALU constants
-
 `define ADD 0
-`define SUB 1
-`define L_SHIFT 2
-`define R_SHIFT 3
-`define AND 4
-`define OR 5
-`define XOR 6
-`define L_SHIFT_L 7
-`define R_SHITF_L 8
-// `define  9
-// `define  10
+`define AND 1
+`define OR 2
+`define SLL 3
+`define SLT 4
+`define SRA 5
+`define SRL 6
+`define SUB 7
+`define XOR 8
+`define SLTU 9
+`define LUIOP 11
+`define JADD 12
+
+//WBSel options
+`define MEM 2'd0
+`define ALU 2'd1
+`define PC_NEXT 2'd2
