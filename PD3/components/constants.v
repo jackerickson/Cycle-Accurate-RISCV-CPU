@@ -28,6 +28,7 @@
 `define LUIOP 11
 `define JADD 12
 
+
 //WBSel options
 `define MEM 2'd0
 `define ALU 2'd1

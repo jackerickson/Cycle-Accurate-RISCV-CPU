@@ -117,7 +117,7 @@ module dut;
     
     // sequential fetching
     always@(posedge clk) begin
-        instruction = i_mem_out;
+        instruction <= i_mem_out;
     end
 
     // down here need to write logic for:
@@ -150,11 +150,11 @@ module PCMux(clk, PCSel, ALU_out, PC, PC_next);
         PC <= PC_next;
     end
     always@(*) begin
-        $display("PCSEL = %b", PCSel);
+        
         if(PCSel)
-            PC_next <= PC + 4;
+            PC_next = PC + 4;
         else 
-            PC_next <= ALU_out;
+            PC_next = ALU_out;
     end
 endmodule
 

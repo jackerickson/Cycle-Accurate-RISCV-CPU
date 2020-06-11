@@ -56,90 +56,90 @@ module fetch_decode(
         case(opcode)
             `LUI: begin
                 decode_uType();
-                PCSel <= 1;//PC
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 0;
-                ALUSel <= `LUIOP;
-                MemRW <= 1;
-                RegWE <= 1;
-                WBSel <= `ALU;
+                PCSel = 1;//PC
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 0;
+                ALUSel = `LUIOP;
+                MemRW = 1;
+                RegWE = 1;
+                WBSel = `ALU;
             end
             `AUIPC: begin
                 decode_uType();
-                PCSel <= 1; //PC+4
-                //BrUn <= 0; // X
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `ADD;
-                MemRW <= 1; // read
-                RegWE <= 1;
-                WBSel <= `ALU;
+                PCSel = 1; //PC+4
+                //BrUn = 0; // X
+                ASel = 0;
+                BSel = 0;
+                ALUSel = `ADD;
+                MemRW = 1; // read
+                RegWE = 1;
+                WBSel = `ALU;
             end
             `JAL: begin 
                 decode_jType();
-                PCSel <= 0; //ALU
-                //BrUn <= 0; // X
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `JADD;
-                MemRW <= 1; // read
-                RegWE <= 1;
-                WBSel <= `PC_NEXT;
+                PCSel = 0; //ALU
+                //BrUn = 0; // X
+                ASel = 0;
+                BSel = 0;
+                ALUSel = `JADD;
+                MemRW = 1; // read
+                RegWE = 1;
+                WBSel = `PC_NEXT;
             end
             `JALR: begin
                 if (funct3 == 3'b000) begin
                     decode_iType();
-                    PCSel <= 0; //ALU
-                    //BrUn <= 0; // X
-                    ASel <= 1;
-                    BSel <= 0;
-                    ALUSel <= `JADD;
-                    MemRW <= 1; // read
-                    RegWE <= 1;
-                    WBSel <= `ALU;
+                    PCSel = 0; //ALU
+                    //BrUn = 0; // X
+                    ASel = 1;
+                    BSel = 0;
+                    ALUSel = `JADD;
+                    MemRW = 1; // read
+                    RegWE = 1;
+                    WBSel = `PC_NEXT;
                 end
                 else $display("Detected Unknown funct3: %0b of Type JALR at PC=%x", funct3, PC);
             end
             `BCC: begin // BRANCHES
                 decode_bType();
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `ADD;
-                MemRW <= 1; // read
-                RegWE <= 0;
-                WBSel <= 0; // X
+                ASel = 0;
+                BSel = 0;
+                ALUSel = `ADD;
+                MemRW = 1; // read
+                RegWE = 0;
+                WBSel = 0; // X
                 case(funct3)
                     3'b000: begin // BEQ
                         // it may be adviseable to place //BrUn sets in their own logic block triggered on instruction, then set this always block to trigger on //BrUn (or something that will switch)
                         //BrUn = 0; // X
-                        if(BrEq) PCSel <= 0; // ALU
-                        else PCSel <= 1; // PC + 4
+                        if(BrEq) PCSel = 0; // ALU
+                        else PCSel = 1; // PC + 4
                     end
-                    3'b001:  // BLT
+                    3'b001:  begin// BNE
                         //BrUn = 0; // signed
-                        // if(BrLt) PCSel <= 0; // ALU
-                        // else  PCSel <= 1;
-                        PCSel <= !BrLt;
-                    3'b100: begin // BNE
+                        if(BrEq) PCSel = 1; // ALU
+                        else  PCSel = 0;
+                     end
+                    3'b100: begin // BLT
                         //BrUn = 0; // signed
-                        if(BrEq) PCSel <= 1; // PC+4
-                        else PCSel <= 0;  //ALU
+                        if(BrLt) PCSel = 0; // PC+4
+                        else PCSel = 1;  //ALU
                     end
                     3'b101: begin // BGE
                         //BrUn = 0; // signed
-                        if(BrLt) PCSel <= 1; // PC+4
-                        else PCSel <= 0;  //ALU
+                        if(BrLt) PCSel = 1; // PC+4
+                        else PCSel = 0;  //ALU
                     end
                     3'b110: begin // BLTU
                         //BrUn = 1; // unsigned
-                        if(BrLt) PCSel <= 0; // ALU
-                        else PCSel <= 1; // PC + 4
+                        if(BrLt) PCSel = 0; // ALU
+                        else PCSel = 1; // PC + 4
                     end
                     3'b111: begin// BGEU
                         //BrUn = 1; // unsigned
-                        if(BrLt) PCSel <= 1; // PC+4
-                        else PCSel <= 0;  //ALU
+                        if(BrLt) PCSel = 1; // PC+4
+                        else PCSel = 0;  //ALU
                     end  
                     default: $display("Error in the BCC Decode");
                 endcase          
@@ -148,14 +148,14 @@ module fetch_decode(
             `LCC: begin // LOADS ---- Might need specific signal to tell memory how much to write
                 decode_iType();
                 // ctl signals are the same throughout
-                PCSel <= 1; //PC + 4
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 0;
-                ALUSel <= `ADD;
-                MemRW <= 1; // read
-                RegWE <= 1;
-                WBSel <= `MEM;
+                PCSel = 1; //PC + 4
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 0;
+                ALUSel = `ADD;
+                MemRW = 1; // read
+                RegWE = 1;
+                WBSel = `MEM;
                 // these need to create like a data width signal or smth, and a signed enable for memory to return the right shtuff (Next PD)
                 case(funct3)
                     3'b000: begin // LB
@@ -179,14 +179,14 @@ module fetch_decode(
                 
             `SCC: begin // STORES
                 decode_sType();
-                PCSel <= 1; //PC + 4
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 0;
-                ALUSel <= `ADD;
-                MemRW <= 0; // write
-                RegWE <= 0;
-                WBSel <= `MEM;
+                PCSel = 1; //PC + 4
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 0;
+                ALUSel = `ADD;
+                MemRW = 0; // write
+                RegWE = 0;
+                WBSel = `MEM;
                 // these need to create like a data width signal or smth, and a signed enable for memory to return the right shtuff (Next PD)
 
                 case(funct3)
@@ -199,51 +199,51 @@ module fetch_decode(
 
             //we will always want to sign extend in MCC opcodes
             `MCC: begin
-                
-                PCSel <= 1; //PC + 4
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 0; // imm
-                MemRW <= 1; // READ
-                RegWE <= 1;
-                WBSel <= `ALU;
+                decode_iType();
+                PCSel = 1; //PC + 4
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 0; // imm
+                MemRW = 1; // READ
+                RegWE = 1;
+                WBSel = `ALU;
 
                 case(funct3)
                     //I-Type cases
                     3'b000: begin // ADDI
-                        decode_iType();
-                        ALUSel <= `ADD;
+                        
+                        ALUSel = `ADD;
                     end
                     3'b010: begin //SLTI
-                        decode_iType();
-                        ALUSel <= `SLT;
+                        
+                        ALUSel = `SLT;
                     end
                      
                     3'b011: begin //SLTIU
-                        decode_iTypeUnsigned();
-                        ALUSel <= `SLTU;
+                        // decode_iTypeUnsigned();
+                        
+                        ALUSel = `SLTU;
                     end
                     3'b100: begin //XORI
-                        decode_iType();
-                        ALUSel <= `XOR;
+                       
+                        ALUSel = `XOR;
                     end
                     3'b110: begin //ORI
-                        decode_iType();
-                        ALUSel <= `OR;
+                        
+                        ALUSel = `OR;
                     end
                     3'b111: begin //ANDI
-                        decode_iType();
-                        ALUSel <= `AND;
+                        
+                        ALUSel = `AND;
                     end
                     //R-Type cases
-                    3'b001: begin
-                        decode_rType();
-                        ALUSel <= `SLL;
+                    3'b001: begin // SLLI
+                        
+                        ALUSel = `SLL;
                     end
-                    3'b101: begin
-                        decode_rType();
-                        if(funct7==7'b0000000) ALUSel <= `SRL;
-                        else if(funct7==7'b0100000) ALUSel <= `SRA;
+                    3'b101: begin //SRLI/SRAI
+                        if(funct7==7'b0000000) ALUSel = `SRL; //SRLI
+                        else if(funct7==7'b0100000) ALUSel = `SRA; //SRAI
                         else $display("funct7 is malformed");
                     end
                     default: $display("Unknown MCC opcode: %b", opcode);
@@ -251,39 +251,40 @@ module fetch_decode(
                 
             end
             `RCC: begin
-                PCSel <= 1; //PC + 4
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 1;
-                MemRW <= 1; // read
-                RegWE <= 1;
-                WBSel <= `ALU;
+                PCSel = 1; //PC + 4
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 1;
+                MemRW = 1; // read
+                RegWE = 1;
+                WBSel = `ALU;
                 case(funct3)
                     3'b000: begin
-                        if(funct7==7'b0000000) ALUSel <= `ADD;
-                        else if(funct7==7'b0100000) ALUSel <= `SUB;
+                        if(funct7==7'b0000000) ALUSel = `ADD;
+                        else if(funct7==7'b0100000) ALUSel = `SUB;
                     end
                     3'b001: begin // SLL
-                        ALUSel <= `SLL;
+                        ALUSel = `SLL;
                     end
                     3'b010: begin // SLT
-                        ALUSel <= `SLT;
+                        ALUSel = `SLT;
                     end
                     3'b011: begin // SLTU
-                        ALUSel <= `SLTU;
+                        ALUSel = `SLTU;
                     end 
                     3'b100: begin // XOR
-                        ALUSel <= `XOR;
+                        ALUSel = `XOR;
                     end
                     3'b101: begin // SRL & SRA
-                        if(funct7 == 7'b0000000) ALUSel <= `SRL;
-                        else if(funct7 == 7'b0100000) ALUSel <= `SRA;
+                        
+                        if(funct7 == 7'b0000000) ALUSel = `SRL;
+                        else if(funct7 == 7'b0100000) ALUSel = `SRA;
                     end
                     3'b110: begin // OR
-                        ALUSel <= `OR;
+                        ALUSel = `OR;
                     end
                     3'b111: begin // AND
-                        ALUSel <= `AND;
+                        ALUSel = `AND;
                     end
                     default: $display("Error in RCC decode");
                 endcase
@@ -291,13 +292,13 @@ module fetch_decode(
             end
             `FCC: begin 
                 //$write("Detected a FCC opcode, these are not implemented\n"); 
-                PCSel <= 1; //PC + 4
-                //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 1;
-                MemRW <= 1; // read
-                RegWE <= 0;
-                WBSel <= `ALU;
+                PCSel = 1; //PC + 4
+                //BrUn = 0; // X
+                ASel = 1;
+                BSel = 1;
+                MemRW = 1; // read
+                RegWE = 0;
+                WBSel = `ALU;
             end
             `CCC: begin
                 if(instruction[31:7] != 25'd0) begin 
@@ -305,6 +306,7 @@ module fetch_decode(
                 $display("Looks like ECALL but the bits are wrong: %b", instruction);
                     
                 end
+                
 
             end
             // default: $display("malformed/unimplemented opcode (%0b) encountered at %8x ", opcode, PC);
@@ -322,22 +324,22 @@ module fetch_decode(
     //R-type requires no immediates decoding so we can just use assigns, but we must assert the enables
     task decode_rType;
         begin
-            imm[31:5] <= {27{instruction[31]}};
-            imm[4:0] <= instruction[24:20];
+            imm[31:12] = {20{instruction[31]}};
+            
+            imm[11:0] = instruction[32:20];
         end
     endtask
+    // task decode_rType;
+    //     begin
+    //         imm[31:5] = {27{instruction[31]}};
+    //         imm[4:0] = instruction[24:20];
+    //     end
+    // endtask
     //12 bit immediate field
     task decode_iType;
         begin
-            imm[31:12] <= {20{instruction[31]}};
-            imm[11:0] <= instruction[31:20];
-        end
-    endtask
-
-    task decode_iTypeUnsigned;
-        begin
-            imm[11:0] <= instruction[31:20];
-            imm[31:12] <= 20'd0;
+            imm[31:12] = {20{instruction[31]}};
+            imm[11:0] = instruction[31:20];
         end
     endtask
     //another 12 bit immediate field but split by the rd1 field
@@ -382,11 +384,11 @@ module fetch_decode(
 
 
 // for debugging
-always@(PC) begin
+always@(instruction) begin
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
         $write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,imm);
        
-        $write("%0x:  \t%8x    \t", PC, instruction);
+        $write("%x:  \t%8x    \t", PC, instruction);
         case(opcode) //output the instruction contents to the console in simulation
             `LUI: begin
             // 7'b0110111: begin

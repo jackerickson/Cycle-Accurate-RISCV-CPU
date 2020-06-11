@@ -41,7 +41,7 @@ module reg_file(
         if (write_enable) begin
             //$display("Writing %d to reg %d", data_rd, addr_rd);
             if(!addr_rd == 32'd0)
-                user_reg[addr_rd] = data_rd;
+                user_reg[addr_rd] <= data_rd;
         end
         for(i=0; i < 32; i++) begin
             if(i<6 || i >28)
