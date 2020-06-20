@@ -1,2 +1,3 @@
 rv32-benchmarks/*
+rv32-benchmarks
 *.code-workspace

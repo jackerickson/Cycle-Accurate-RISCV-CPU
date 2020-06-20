@@ -60,7 +60,11 @@ module dut;
 
     // simulation end conditions
     always@(posedge clk) begin
-
+        
+        if(PC_next == 32'h0000_0000) begin
+            $display("PC_Next is blank, exiting since no more instructions");
+            $finish;
+        end
 
         if(ALUSel == `JADD && data_rs1 == 32'h0101_1111) begin 
             $display("Returning to SP at end of memory, terminating simulation.");

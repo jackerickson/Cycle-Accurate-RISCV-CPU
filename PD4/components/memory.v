@@ -1,8 +1,9 @@
 // `define mem_size 1048576 //Bytes
 
-`define source "components/simple_programs/gcd.x" //Binary file to load Memory from
+// `define source "components/simple_programs/fact.x" //Binary file to load Memory from
 // `define source "components/individual-instructions/rv32ui-p-srai.x" 
 // `define source "program.x" //used for batch running so I can run multiple tests at once
+`define source "temp.x" //used for batch running so I can run multiple tests at once
 
 //`define start_address 32'h01000000
 `define relevant_addr 32'h0100_0044;
