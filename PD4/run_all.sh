@@ -1,14 +1,10 @@
 rm output.txt
 
-
-
-
-for file in simple_programs/*.x
+for file in components/individual-instructions/*.x
 do
-	PASS=${}
 	cat $file > program.x
 	echo "${file##*/}" >> output.txt
-	./Testbench_fetch_decode >> output.txt
+	./testbench >> output.txt
 	echo "$file"
 done
 
