@@ -1,0 +1,91 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Thu Jun 11 23:44:04 2020
+[*]
+[dumpfile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbench.vcd"
+[dumpfile_mtime] "Thu Jun 11 23:44:01 2020"
+[dumpfile_size] 21382
+[savefile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbenchWaves.gtkw"
+[timestart] 178
+[size] 958 1008
+[pos] 0 7
+*-4.168257 203 265 165 195 205 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dut.
+[sst_width] 197
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 296
+@28
+[color] 1
+dut.clk
+@200
+-ALU inputs
+@22
+dut.ALUSel[3:0]
+@24
+dut.ALU_in1[31:0]
+dut.ALU_in2[31:0]
+@22
+dut.ALU_out[31:0]
+@28
+dut.ASel
+dut.BSel
+dut.BrEq
+dut.BrUn
+dut.BrLt
+@420
+[color] 3
+dut.PCSel
+@28
+dut.WBSel[1:0]
+@22
+[color] 2
+dut.PC[31:0]
+dut.PC_next[31:0]
+@28
+dut.RegWE
+@200
+-Dest
+@24
+[color] 1
+dut.addr_rd[4:0]
+@22
+dut.wb[31:0]
+@200
+-rs1
+@24
+dut.addr_rs1[4:0]
+@22
+[color] 1
+dut.data_rs1[31:0]
+@200
+-rs2
+@24
+dut.addr_rs2[4:0]
+@22
+[color] 1
+dut.data_rs2[31:0]
+@28
+dut.MemRW
+@23
+dut.i_mem_out[31:0]
+@24
+dut.imm[31:0]
+@22
+dut.instruction[31:0]
+@200
+-D_MEM
+@28
+dut.d_mem.RdUn
+dut.d_mem.access_size[1:0]
+@22
+dut.d_mem.address[31:0]
+@28
+dut.d_mem.clk
+@22
+dut.d_mem.data_in[31:0]
+dut.d_mem.data_out[31:0]
+@28
+dut.d_mem.w_enable
+[pattern_trace] 1
+[pattern_trace] 0

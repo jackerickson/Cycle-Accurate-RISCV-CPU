@@ -1,5 +1,4 @@
 
-rm prog_output.txt &>/dev/null
 
 BIN_PATH=../rv32-benchmarks/simple-programs
 TB_PATH=testbench.v
@@ -10,6 +9,7 @@ function run_TB {
 }
 
 if [ $# -eq 0 ]; then
+    rm prog_output.txt &>/dev/null
     echo    "_________________________________"
     echo -e "|Instruction\t|Pass\t|Fail\t|"
     for file in $BIN_PATH/*.x
