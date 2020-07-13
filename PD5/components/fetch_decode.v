@@ -72,46 +72,46 @@ module fetch_decode(
         //ROM instruction decoder
         case(opcode)
             `LUI: begin
-                decode_uType();
+                // decode_uType();
                 PCSel <= 1;//PC
                 //BrUn <= 0; // X
-                ASel <= 1;
-                BSel <= 0;
-                ALUSel <= `LUIOP;
+                // ASel <= 1;
+                // BSel <= 0;
+                // ALUSel <= `LUIOP;
                 MemRW <= 0;
                 RegWE <= 1;
                 WBSel <= `ALU;
             end
             `AUIPC: begin
-                decode_uType();
+                // decode_uType();
                 PCSel <= 1; //PC+4
                 //BrUn <= 0; // X
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `ADD;
+                // ASel <= 0;
+                // BSel <= 0;
+                // ALUSel <= `ADD;
                 MemRW <= 0; // read
                 RegWE <= 1;
                 WBSel <= `ALU;
             end
             `JAL: begin 
-                decode_jType();
+                // decode_jType();
                 PCSel <= 0; //ALU
                 //BrUn <= 0; // X
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `JADD;
+                // ASel <= 0;
+                // BSel <= 0;
+                // ALUSel <= `JADD;
                 MemRW <= 0; // read
                 RegWE <= 1;
                 WBSel <= `PC_NEXT;
             end
             `JALR: begin
                 if (funct3 == 3'b000) begin
-                    decode_iType();
+                    // decode_iType();
                     PCSel <= 0; //ALU
                     //BrUn <= 0; // X
-                    ASel <= 1;
-                    BSel <= 0;
-                    ALUSel <= `JADD;
+                    // ASel <= 1;
+                    // BSel <= 0;
+                    // ALUSel <= `JADD;
                     MemRW <= 0; // read
                     RegWE <= 1;
                     WBSel <= `PC_NEXT;
@@ -120,10 +120,10 @@ module fetch_decode(
                 else $display("Detected Unknown funct3: %0b of Type JALR at PC=%x", funct3, PC);
             end
             `BCC: begin // BRANCHES
-                decode_bType();
-                ASel <= 0;
-                BSel <= 0;
-                ALUSel <= `ADD;
+                // decode_bType();
+                // ASel <= 0;
+                // BSel <= 0;
+                // ALUSel <= `ADD;
                 MemRW <= 0; // read
                 RegWE <= 0;
                 WBSel <= 0; // X

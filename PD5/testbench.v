@@ -108,6 +108,8 @@ module dut;
     PCMux       PCMux(.clk(clk), .PCSel(PCSel), .ALU_out(ALU_out), .PC(PC), .PC_next(PC_next));
 
     // alu         alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel), .alu_res(ALU_out));
+    wire [31:0] inst_x;
+    wire [31:0] PC_x;
     execute     execute(
         .clk(clk),
         .PC_d(PC),
@@ -115,13 +117,22 @@ module dut;
         .rs2_d(data_rs2),
         .inst_d(instruction),
         .PC_x(PC),
-        .inst_x(),
+        .inst_x(inst_x),
         .ALU_out(ALU_out),
         .write_data(write_data),
         .BrEq(BrEq),
         .BrLt(BrLt)
     );
-    memory      #(.LOAD_INSTRUCTION_MEM(1)) d_mem(.clk(clk), .address(ALU_out), .data_in(write_data), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
+    // memory      d_mem(.clk(clk), .address(ALU_out), .data_in(write_data), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
+    mem_stage       mem_stage(
+                        .clk(clk),
+                        .PC_x(PC_x),
+                        .alu_x(ALU_out),
+                        .rs2_x(write_data),
+                        .inst_x(inst_x),
+                        .inst_m(), //connect this later
+                        .wb_m(wb)                        
+    );
 
     reg_file    reg_file(.clk(clk),
                         .addr_rs1(addr_rs1),

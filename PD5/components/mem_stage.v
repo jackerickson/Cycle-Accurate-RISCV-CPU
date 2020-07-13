@@ -1,46 +1,57 @@
 module mem_stage(
     input clk,
-    input [31:0] PC,
-    input [31:0] alu,
-    input [31:0] rs2,
-    input inst[31:0],
+    input [31:0] PC_x,
+    input [31:0] alu_x,
+    input [31:0] rs2_x,
+    input [31:0] inst_x,
     
-    output inst_o [31:0],
-    output [31:0] wb
+    output [31:0] inst_m ,
+    output reg [31:0] wb_m
 );
 
 
     wire WEn = 0;
+    
+    // opcode parts
     wire [2:0]funct3;
-    wire [1:0] access_size;
-    wire RdUn = 0;
-
+    reg [1:0] access_size;
+    wire RdUn;
+    reg [31:0]alu_m;
+    reg [31:0]rs2_m;
+    reg [31:0]PC_m;
     wire [31:0] d_mem_out;
 
-
-    input [31:0] dmem;
-    input [31:0] alu;
-    input [31:0] pc_next;
-    input [1:0] sel;
-
-    output reg [31:0] out;
-
-
-    assign funct3 = inst[14:12];
-    //RdUn check if funct3 is one of the unsigned loads
-    assign RdUn = funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
-
-
-    assign WEn = (inst[6:0] == 7'b0100011)? 1:0; // if opcode is SX
     
-    memory      d_mem(.clk(clk), .address(alu), .data_in(rs2), .w_enable(WEn), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
+    reg [31:0] inst_m;
+
+
+
+    assign opcode = inst_m[6:0];
+    assign funct3 = inst_m[14:12];
+    assign funct7 = inst_m[31:25];
+
+    //RdUn check if funct3 is one of the unsigned loads
+    assign RdUn = (funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
+
+
+    assign WEn = (inst_m[6:0] == `SCC)? 1:0; // if opcode is SX
+    
+    memory      d_mem(.clk(clk), .address(alu_m), .data_in(rs2_m), .w_enable(WEn), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
+    //change to posedge clk when piplining
+    always @(*) begin
+        inst_m <= inst_x;
+        rs2_m <= rs2_x;
+        alu_m <= alu_x;
+        PC_m <= PC_x;
+    end
 
     //might want to put RegRW control here then pass it on too...
+    //WBMux
     always@(*) begin
-        case(inst[6:0])
-            7'b0000011:  wb <= d_mem_out;
-            7'b1101111, 7'b1100111: wb <= PC + 4;
-            default: wb <= alu;
+        case(inst_x[6:0])
+            `LCC:  wb_m <= d_mem_out;
+            `JAL, `JALR: wb_m <= PC_m + 4;
+            default: wb_m <= alu_m;
         endcase
     end 
 
@@ -48,9 +59,12 @@ module mem_stage(
     always@(*) begin
         case(funct3)
             3'b000, 3'b100: access_size <= `BYTE;
-            3'b001, 3'101: access_size <= `HALFWORD;
+            // 3'b001, 3'101: access_size <= `HALFWORD;
             default: access_size <= `WORD;
         endcase
     end
+
+
+
 
 endmodule

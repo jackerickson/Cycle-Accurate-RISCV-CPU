@@ -4,31 +4,20 @@ module execute(
     input [31:0] rs1_d,
     input [31:0] rs2_d,
     input [31:0] inst_d,
-    // input [31:0] imm_in,
-    // input [3:0] ALUSel_in,
-    // input BrUn_in,
-    // input ASel_in,
-    // input BSel_in,
-    // input MemRW,
-    // input WBSel,
-    // input wire [31:0] inst_x,
+
     output wire [31:0] PC_x,
     output wire [31:0] inst_x,
     output wire [31:0] ALU_out,
     output wire [31:0] write_data,
-
-
+    output wire PCSel,
     output BrEq,
     output BrLt);
     
     wire [31:0] rs1 ;
     wire [31:0] rs2 ;
-    // reg [31:0] imm=0;
-    // reg [3:0] ALUSel=0;
-    // reg BrUn=0;
-    // reg ASel=0;
-    // reg BSel=0;
     
+    wire [31:0] ALU_in1;
+    wire [31:0] ALU_in2;
 
     reg [31:0]imm; //need to generate immediate
     wire [6:0] opcode;
@@ -40,14 +29,11 @@ module execute(
     wire BrUn;
 
     assign opcode = inst_x[6:0];
-    // assign addr_rd = inst_x[11:7];
     assign funct3 = inst_x[14:12];
-    // assign addr_rs1 = inst_x[19:15];
-    // assign addr_rs2 = inst_x[24:20];
     assign funct7 = inst_x[31:25];
 
-    wire [31:0] ALU_in1;
-    wire [31:0] ALU_in2;
+    assign 
+
 
 
     alu alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel),.alu_res(ALU_out));
@@ -63,20 +49,9 @@ module execute(
 
     // //register the inputs
     always @(posedge clk) begin
-    //     rs1 <= rs1_in;
-    //     rs2 <= rs2_in
-    //     imm <= imm-In;
-    //     ALUSel <= ALUSel_in;
-    //     BrUn <= BrUn_in;
-    //     ASel <= ASel_in;
-    //     BSel <= BSel_in;
-    //     memRW_r <= MemRW;
-    //     WBSel_r <= WBSel;
-    //     RegWE_r <= RegWE;
-
-            //removed now for testing
-            // inst_x <= inst_d
-            // PC_x <= PC_d;
+        //removed now for testing
+        // inst_x <= inst_d
+        // PC_x <= PC_d;
        
     end
 
