@@ -1,8 +1,23 @@
-`include "components/fetch_decode.v"
+// `include "components/fetch_decode.v"
 `include "components/constants.v"
-`include "components/memory.v"
-`include "alu.v"
-`include "reg_file.v"
+// `include "components/memory.v"
+// `include "execute.v"
+// `include "alu.v"
+// `include "reg_file.v"
+
+/*
+Tasks:
+
+    - Correct pipelined executions
+    - Instance of stalls due to Read after write data hazards
+    - Forwarding happening on each of the input and every stage
+    NO BRANCH PREDICTION THANK GOD
+
+    Method to avoid RAW errors - insert nops (stalls until the RAW is cleared)
+        - insert NOPS wherever there is a data dependance that cannot be resolved via forwarding
+
+*/
+
 
 module dut;
 
@@ -30,25 +45,24 @@ module dut;
     wire BrUn, PCSel,ASel, BSel, BrEq, BrLt, RdUn;
     wire [1:0] access_size;
     wire RegWE; 
+
     wire MemRW;
-    wire [1:0]WBSel;
 
-    wire [3:0]ALUSel;
 
-    //regfile connectors
-
+    //regfile outputs
     wire [31:0] data_rs1;
     wire [31:0] data_rs2;
 
-    //ALU inputs
-
-    wire [31:0] ALU_in1;
-    wire [31:0] ALU_in2;
+    //execute stage
+    wire [3:0]ALUSel;
     wire [31:0] ALU_out;
+    wire [31:0] write_data;
 
+
+    //memory stage
     wire [31:0] wb;
+    wire [1:0]WBSel;
     wire [31:0] d_mem_out;
-    wire [31:0] formatted_d_mem_out;
     
     // this is the mux on the 2nd ALU input that tell it to use ImmSelediate or the rs2 value
 
@@ -57,22 +71,33 @@ module dut;
         $dumpvars(0, dut);
 
     end
-
+    reg state = 0;
+    integer i = 0;
     // simulation end conditions
-    always@(posedge clk) begin
-        
-        if(PC_next == 32'h0000_0000) begin
-            $display("PC_Next is blank, exiting since no more instructions");
-            $finish;
-        end
 
-        if(ALUSel == `JADD && data_rs1 == 32'h0101_1111) begin 
-            $display("Returning to SP at end of memory, terminating simulation.");
+    always@(*) begin
+        
+        // if(wb == 32'h0101_1111 && addr_rd == 2) begin
+        // end
+
+        if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.fd1.opcode == `JALR) begin 
+            $display("Returning to SP at end of memory, terminating simulation. \nContents of regfile: ");
+            
+            // $display("Contents of regfile: ");
+            for (i=0;i<32;i++) begin
+                $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
+            end
             $finish;
         end
-        // if(i_mem_out == 32'd0 || PC == 32'h0100_0044) begin
-        //     #5$write("\n Ending sim since i_mem_out = %x or PC = %x", i_mem_out, PC);
-        //     //$finish;
+            // $finish;
+
+
+        if(dut.fd1.opcode == `CCC) begin $display("ECALL detected, ending sim"); $finish; end
+
+        // if(PC_next == 32'h0000_0000) begin
+        //     $display("PC_Next is blank, exiting since no more instructions");
+        //     //write_reg_contents <= 1;
+        //     $finish;
         // end
 
         if(instruction == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); $finish; end
@@ -80,11 +105,26 @@ module dut;
 
     memory #(.LOAD_INSTRUCTION_MEM(1)) i_mem (.clk(clk), .address(PC_next), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(i_mem_out));
 
-    memory      #(.LOAD_INSTRUCTION_MEM(1)) d_mem(.clk(clk), .address(ALU_out), .data_in(data_rs2), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
     PCMux       PCMux(.clk(clk), .PCSel(PCSel), .ALU_out(ALU_out), .PC(PC), .PC_next(PC_next));
 
-    alu         alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel), .alu_res(ALU_out));
+    // alu         alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel), .alu_res(ALU_out));
+    execute     execute(
+        .clk(clk),
+        .PC_x(PC),
+        .rs1(data_rs1),
+        .rs2(data_rs2),
+        .imm(imm),
+        .ALUSel(ALUSel),
+        .BrUn(BrUn),
+        .ASel(ASel),
+        .BSel(BSel),
+        .ALU_out(ALU_out),
+        .write_data(write_data),
+        .BrEq(BrEq),
+        .BrLt(BrLt)
 
+    );
+    memory      #(.LOAD_INSTRUCTION_MEM(1)) d_mem(.clk(clk), .address(ALU_out), .data_in(write_data), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
 
     reg_file    reg_file(.clk(clk),
                         .addr_rs1(addr_rs1),
@@ -124,14 +164,10 @@ module dut;
         );
 
 
-    //ALU input muxes
 
-    assign ALU_in1 = ASel ? data_rs1 : PC;
-    assign ALU_in2 = BSel ? data_rs2 : imm;
+   
 
-    // BrMux
-    assign BrEq = (data_rs1 == data_rs2);
-    assign BrLt = BrUn ? (data_rs1 < data_rs2): ($signed(data_rs1) < $signed(data_rs2));
+    
     
     // sequential fetching
     always@(posedge clk) begin

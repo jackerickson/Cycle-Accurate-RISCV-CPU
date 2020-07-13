@@ -1,15 +1,15 @@
 
-rm prog_output.txt &>/dev/null
 
 BIN_PATH=../rv32-benchmarks/simple-programs
 TB_PATH=testbench.v
 
 function run_TB {
-    iverilog -g2005 -o `basename $TB_PATH .v` $TB_PATH -I components/
+    iverilog -g2005 -o `basename $TB_PATH .v` $TB_PATH -y components -I components
     ./`basename $TB_PATH .v`
 }
 
 if [ $# -eq 0 ]; then
+    rm prog_output.txt &>/dev/null
     echo    "_________________________________"
     echo -e "|Instruction\t|Pass\t|Fail\t|"
     for file in $BIN_PATH/*.x

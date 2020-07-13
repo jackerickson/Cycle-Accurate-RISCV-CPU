@@ -14,7 +14,7 @@
 
 
 
-//ALU constants
+//ALU select codes
 `define ADD 0
 `define AND 1
 `define OR 2

@@ -1,12 +1,9 @@
 // `define mem_size 1048576 //Bytes
 
-// `define source "components/simple_programs/fact.x" //Binary file to load Memory from
+// `define source "components/simple-programs/fact.x" //Binary file to load Memory from
 // `define source "components/individual-instructions/rv32ui-p-srai.x" 
-// `define source "program.x" //used for batch running so I can run multiple tests at once
 `define source "temp.x" //used for batch running so I can run multiple tests at once
 
-//`define start_address 32'h01000000
-`define relevant_addr 32'h0100_0044;
 module memory(
     input clk,
     input [31:0] address,
@@ -17,7 +14,7 @@ module memory(
     output [31:0] data_out
     );
 
-    parameter LOAD_INSTRUCTION_MEM = 0;
+    parameter LOAD_INSTRUCTION_MEM = 1;
     parameter start_address = 32'h01000000;
     parameter mem_size = 32'd1048576; //Bytes
 
@@ -34,12 +31,11 @@ module memory(
     initial begin
         
         //$display("memorySize=%d", mem_size);
-
         for(i=start_address;i<mem_size + start_address;i=i+1) mem[i] = 0;
-
-    
+  
         //$display("memorySize = %dB", mem_size);
 
+        //TODO: remove LOAD_INSTRUCTION_MEM 
         if(LOAD_INSTRUCTION_MEM) begin
             for (i=0;i<=mem_size;i=i+1) begin
                         t_mem[i] = 0;

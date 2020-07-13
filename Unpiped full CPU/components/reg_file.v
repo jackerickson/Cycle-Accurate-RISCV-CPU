@@ -18,13 +18,32 @@ module reg_file(
     //initialize to 0
     initial begin
         for(i=0; i < 32; i++) begin
-            user_reg[i] = i;          
+            user_reg[i] = 0;          
         end
 
         user_reg[2] = 32'h0100_0000 + 32'h0001_1111; //Init SP to end of memory
         user_reg[0] = 0;
+        $display("Initial Contents of regfile: ");
+        for (i=0;i<32;i++) begin
+            $display("r%0d = %0x", i, user_reg[i]);
+        end
+
     end
     
+    // reg state = 0;
+    // always @(user_reg[2]) begin
+    //     if (user_reg[2] == 32'h0101_1111) begin
+    //         if(!state) state <= 1;
+    //         else begin
+    //             $display("Contents of regfile: ");
+    //             for (i=0;i<32;i++) begin
+    //                 $display("r%0d = %0x", i, user_reg[i]);
+    //             end
+    //             $finish;
+    //         end
+            
+    //     end
+    // end
 
 
 

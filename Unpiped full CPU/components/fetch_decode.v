@@ -181,11 +181,11 @@ module fetch_decode(
                         RdUn <= 1'b0;
                     end
                     3'b001:begin // LH
-                        access_size=`HALFWORD;
+                        access_size <=`HALFWORD;
                         RdUn <= 1'b0;
                     end
                     3'b010:begin // LW
-                        access_size=`WORD;
+                        access_size <=`WORD;
                         RdUn <= 1'b0;
                     end
                     3'b100:begin // LBU
@@ -215,7 +215,7 @@ module fetch_decode(
                 case(funct3)
                     3'b000: access_size <= `BYTE; //SB
                     3'b001: access_size <= `HALFWORD; //SH
-                    3'b010: access_size=`WORD; //SW
+                    3'b010: access_size <=`WORD; //SW
                     default: $display("Error in the SCC Decode");
                 endcase
             end
@@ -408,9 +408,9 @@ module fetch_decode(
 
 
 // for debugging
-always@(PC) begin
+always@(instruction) begin
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
-        $write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,imm);
+        //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,imm);
        
         $write("%x:  \t%8x    \t", PC, instruction);
         case(opcode) //output the instruction contents to the console in simulation
@@ -513,7 +513,7 @@ always@(PC) begin
             end
             `CCC: begin
                 //$write("Detected a CCC opcode\n");
-                if(instruction[31:7] == 25'd0) begin $display("ECALL  "); $finish; end
+                if(instruction[31:7] == 25'd0) begin $display("ECALL  "); end
                 else $display("Looks an ECALL but doesn't match what I expected: %b", instruction);
 
             end

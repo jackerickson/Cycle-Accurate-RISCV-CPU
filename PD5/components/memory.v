@@ -35,6 +35,7 @@ module memory(
   
         //$display("memorySize = %dB", mem_size);
 
+        //TODO: remove LOAD_INSTRUCTION_MEM 
         if(LOAD_INSTRUCTION_MEM) begin
             for (i=0;i<=mem_size;i=i+1) begin
                         t_mem[i] = 0;
