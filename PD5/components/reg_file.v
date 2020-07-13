@@ -23,10 +23,10 @@ module reg_file(
 
         user_reg[2] = 32'h0100_0000 + 32'h0001_1111; //Init SP to end of memory
         user_reg[0] = 0;
-        $display("Initial Contents of regfile: ");
-        for (i=0;i<32;i++) begin
-            $display("r%0d = %0x", i, user_reg[i]);
-        end
+        // $display("Initial Contents of regfile: ");
+        // for (i=0;i<32;i++) begin
+        //     $display("r%0d = %0x", i, user_reg[i]);
+        // end
 
     end
     

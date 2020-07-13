@@ -1,37 +1,85 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Thu Jun 11 23:44:04 2020
+[*] Mon Jul 13 06:26:35 2020
 [*]
-[dumpfile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbench.vcd"
-[dumpfile_mtime] "Thu Jun 11 23:44:01 2020"
-[dumpfile_size] 21382
-[savefile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbenchWaves.gtkw"
-[timestart] 178
-[size] 958 1008
-[pos] 0 7
-*-4.168257 203 265 165 195 205 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
+[dumpfile_mtime] "Mon Jul 13 06:25:35 2020"
+[dumpfile_size] 16764
+[savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves.gtkw"
+[timestart] 0
+[size] 1920 1017
+[pos] -1 -1
+*-4.168257 85 265 165 195 205 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dut.
 [sst_width] 197
 [signals_width] 166
 [sst_expanded] 1
-[sst_vpaned_height] 296
+[sst_vpaned_height] 299
 @28
 [color] 1
 dut.clk
 @200
 -ALU inputs
 @22
-dut.ALUSel[3:0]
-@24
-dut.ALU_in1[31:0]
-dut.ALU_in2[31:0]
-@22
+dut.execute.ALUSel[3:0]
+@c00022
 dut.ALU_out[31:0]
+@28
+(0)dut.ALU_out[31:0]
+(1)dut.ALU_out[31:0]
+(2)dut.ALU_out[31:0]
+(3)dut.ALU_out[31:0]
+(4)dut.ALU_out[31:0]
+(5)dut.ALU_out[31:0]
+(6)dut.ALU_out[31:0]
+(7)dut.ALU_out[31:0]
+(8)dut.ALU_out[31:0]
+(9)dut.ALU_out[31:0]
+(10)dut.ALU_out[31:0]
+(11)dut.ALU_out[31:0]
+(12)dut.ALU_out[31:0]
+(13)dut.ALU_out[31:0]
+(14)dut.ALU_out[31:0]
+(15)dut.ALU_out[31:0]
+(16)dut.ALU_out[31:0]
+(17)dut.ALU_out[31:0]
+(18)dut.ALU_out[31:0]
+(19)dut.ALU_out[31:0]
+(20)dut.ALU_out[31:0]
+(21)dut.ALU_out[31:0]
+(22)dut.ALU_out[31:0]
+(23)dut.ALU_out[31:0]
+(24)dut.ALU_out[31:0]
+(25)dut.ALU_out[31:0]
+(26)dut.ALU_out[31:0]
+(27)dut.ALU_out[31:0]
+(28)dut.ALU_out[31:0]
+(29)dut.ALU_out[31:0]
+(30)dut.ALU_out[31:0]
+(31)dut.ALU_out[31:0]
+@1401200
+-group_end
+@22
+dut.execute.ALU_out[31:0]
+dut.execute.ALU_in1[31:0]
+dut.execute.ALU_in2[31:0]
+@23
+dut.execute.rs1[31:0]
+@22
+dut.execute.rs1_d[31:0]
+@200
+-Decode signals
 @28
 dut.ASel
 dut.BSel
-dut.BrEq
 dut.BrUn
+@200
+-X decode sigs
+@28
+dut.execute.ASel
+dut.execute.BrUn
+dut.execute.BSel
+dut.BrEq
 dut.BrLt
 @420
 [color] 3
@@ -51,6 +99,8 @@ dut.RegWE
 dut.addr_rd[4:0]
 @22
 dut.wb[31:0]
+@28
+dut.WBSel[1:0]
 @200
 -rs1
 @24
@@ -67,7 +117,7 @@ dut.addr_rs2[4:0]
 dut.data_rs2[31:0]
 @28
 dut.MemRW
-@23
+@22
 dut.i_mem_out[31:0]
 @24
 dut.imm[31:0]

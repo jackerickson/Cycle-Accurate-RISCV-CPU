@@ -81,12 +81,12 @@ module dut;
         // end
 
         if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.fd1.opcode == `JALR) begin 
-            $display("Returning to SP at end of memory, terminating simulation. \nContents of regfile: ");
+            // $display("Returning to SP at end of memory, terminating simulation. \nContents of regfile: ");
             
-            // $display("Contents of regfile: ");
-            for (i=0;i<32;i++) begin
-                $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
-            end
+            // // $display("Contents of regfile: ");
+            // for (i=0;i<32;i++) begin
+            //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
+            // end
             $finish;
         end
             // $finish;
@@ -110,19 +110,16 @@ module dut;
     // alu         alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel), .alu_res(ALU_out));
     execute     execute(
         .clk(clk),
+        .PC_d(PC),
+        .rs1_d(data_rs1),
+        .rs2_d(data_rs2),
+        .inst_d(instruction),
         .PC_x(PC),
-        .rs1(data_rs1),
-        .rs2(data_rs2),
-        .imm(imm),
-        .ALUSel(ALUSel),
-        .BrUn(BrUn),
-        .ASel(ASel),
-        .BSel(BSel),
+        .inst_x(),
         .ALU_out(ALU_out),
         .write_data(write_data),
         .BrEq(BrEq),
         .BrLt(BrLt)
-
     );
     memory      #(.LOAD_INSTRUCTION_MEM(1)) d_mem(.clk(clk), .address(ALU_out), .data_in(write_data), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
 

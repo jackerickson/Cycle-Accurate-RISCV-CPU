@@ -404,7 +404,6 @@ module fetch_decode(
         end
     endtask
 
-    //TODO: write unsigned immediate decoder for SLTIU
 
 
 // for debugging
