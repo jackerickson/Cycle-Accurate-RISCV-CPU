@@ -21,8 +21,8 @@ module execute(
     output BrEq,
     output BrLt);
     
-    wire [31:0] rs1 = 0;
-    wire [31:0] rs2 =0;
+    wire [31:0] rs1 ;
+    wire [31:0] rs2 ;
     // reg [31:0] imm=0;
     // reg [3:0] ALUSel=0;
     // reg BrUn=0;
@@ -94,31 +94,34 @@ module execute(
     
 
     //multi-case assigns
-    always @(*) begin
-        if(opcode == `MCC || opcode == `RCC) begin
-            case (funct3)
-                3'b000: begin
-                    if (opcode == `MCC) ALUSel <= `ADD;
-                    else begin
-                        if(funct7[5]) ALUSel <= `SUB;
-                        else ALUSel <= `ADD;
+    always @(inst_x) begin
+        case(opcode)
+            `MCC, `RCC: begin
+                case (funct3)
+                    3'b000: begin
+                        if (opcode == `MCC) ALUSel <= `ADD;
+                        else begin
+                            if(funct7[5]) ALUSel <= `SUB;
+                            else ALUSel <= `ADD;
+                        end
                     end
-                end
-                3'b001: ALUSel <= `SLL;
-                3'b010: ALUSel <= `SLT;
-                3'b011: ALUSel <= `SLTU;
-                3'b100: ALUSel <= `XOR;
-                3'b101: begin
-                    if(funct7[5])  ALUSel <= `SRA;
-                    else  ALUSel <= `SRL;
-                end
-                3'b110: ALUSel <= `OR;
-                3'b111: ALUSel <= `AND;
-                default: ALUSel <= `AND;
-            endcase
-        end else begin
-            ALUSel = `ADD;
-        end
+                    3'b001: ALUSel <= `SLL;
+                    3'b010: ALUSel <= `SLT;
+                    3'b011: ALUSel <= `SLTU;
+                    3'b100: ALUSel <= `XOR;
+                    3'b101: begin
+                        if(funct7[5])  ALUSel <= `SRA;
+                        else  ALUSel <= `SRL;
+                    end
+                    3'b110: ALUSel <= `OR;
+                    3'b111: ALUSel <= `AND;
+                    default: ALUSel <= `ADD;
+                endcase
+            end
+            `JAL, `JALR: ALUSel <= `JADD;
+            `LUI: begin ALUSel <= `LUIOP; $display("LUIOP"); end
+            default: ALUSel <= `ADD;
+        endcase
 
         //immediate generation
         case (opcode)
@@ -146,6 +149,7 @@ module execute(
     //12 bit immediate field
     task decode_iType;
         begin
+            $display("Insns: %b at PC_x=%x", inst_x, PC_x );
             imm[31:12] <= {20{inst_x[31]}};
             imm[11:0] <= inst_x[31:20];
         end

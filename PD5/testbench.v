@@ -80,19 +80,19 @@ module dut;
         // if(wb == 32'h0101_1111 && addr_rd == 2) begin
         // end
 
-        if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.fd1.opcode == `JALR) begin 
-            // $display("Returning to SP at end of memory, terminating simulation. \nContents of regfile: ");
+        // if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.fd1.opcode == `JALR) begin 
+        //     $display("Returning to SP at end of memory, terminating simulation.");
             
-            // // $display("Contents of regfile: ");
-            // for (i=0;i<32;i++) begin
-            //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
-            // end
-            $finish;
-        end
+        //     // // $display("Contents of regfile: ");
+        //     // for (i=0;i<32;i++) begin
+        //     //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
+        //     // end
+        //     #20 $finish;
+        // end
             // $finish;
 
 
-        if(dut.fd1.opcode == `CCC) begin $display("ECALL detected, ending sim"); $finish; end
+        if(dut.fd1.opcode == `CCC) begin $display("ECALL detected, ending sim"); #20 $finish; end
 
         // if(PC_next == 32'h0000_0000) begin
         //     $display("PC_Next is blank, exiting since no more instructions");
@@ -100,7 +100,7 @@ module dut;
         //     $finish;
         // end
 
-        if(instruction == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); $finish; end
+        if(instruction == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #20 $finish; end
     end
 
     memory #(.LOAD_INSTRUCTION_MEM(1)) i_mem (.clk(clk), .address(PC_next), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(i_mem_out));
@@ -244,10 +244,22 @@ module dut;
         //Regfile logging
         // $write("RegFile Ports\n\tInput: addr_rs1 = %0d, addr_rs2 = %0d, addr_rd = %0d, data_rd = %0x (%0d), write_enable = %b \n", addr_rs1, addr_rs2, addr_rd, wb, wb, RegWE);
         // $write("\tOutput: data_rs1 = 0x%0x (%0d), data_rs2 = 0x%0x (%0d)\n",data_rs1, data_rs1, data_rs2, data_rs2);
+        
+        // $write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, imm(b)= %0b, imm=%d\n",
+        //     dut.execute.opcode, 
+        //     dut.execute.funct3,
+        //     dut.execute.funct7, 
+        //     addr_rd, 
+        //     addr_rs1, 
+        //     addr_rs2,dut.execute.imm,
+        //     dut.execute.imm);
+
         $write("\n--------------------------------------\n"); 
     end
 
 endmodule
+
+
 
 module PCMux(clk, PCSel, ALU_out, PC, PC_next);
 
