@@ -23,56 +23,14 @@ module dut;
 
     reg clk = 0;
 
-    // instruction memory inputs
-
-
-
-    wire[31:0] i_mem_out;
-    reg [31:0]instruction;
-
-
-    //Fetch_decoder ports
-    wire [4:0] addr_rd;
-    wire [4:0] addr_rs1;
-    wire [4:0] addr_rs2;
-    wire [31:0] imm;
-    wire [31:0] PC;
-    wire [31:0] PC_next;
-
-
-    // control wires out of the decoder
-
-    wire BrUn, PCSel,ASel, BSel, BrEq, BrLt, RdUn;
-    wire [1:0] access_size;
-    wire RegWE; 
-
-    wire MemRW;
-
-
-    //regfile outputs
-    wire [31:0] data_rs1;
-    wire [31:0] data_rs2;
-
-    //execute stage
-    wire [3:0]ALUSel;
-    wire [31:0] ALU_out;
-    wire [31:0] write_data;
-
-
-    //memory stage
-    wire [31:0] wb;
-    wire [1:0]WBSel;
-    wire [31:0] d_mem_out;
-    
-    // this is the mux on the 2nd ALU input that tell it to use ImmSelediate or the rs2 value
+    // instruction memory inputs    
 
     initial begin
         $dumpfile("testbench.vcd");
         $dumpvars(0, dut);
 
     end
-    reg state = 0;
-    integer i = 0;
+
     // simulation end conditions
 
     always@(*) begin
@@ -92,234 +50,287 @@ module dut;
             // $finish;
 
 
-        if(dut.fd1.opcode == `CCC) begin $display("ECALL detected, ending sim"); #20 $finish; end
+        if(inst_x[6:0] == `CCC) begin $display("ECALL detected, ending sim"); #5 $finish; end
 
-        // if(PC_next == 32'h0000_0000) begin
-        //     $display("PC_Next is blank, exiting since no more instructions");
+        if(inst_x == 32'd0) #5 $finish;
+
+        // if(PC_fetch == 32'h0000_0000) begin
+        //     $display("PC_fetch is blank, exiting since no more instructions");
         //     //write_reg_contents <= 1;
         //     $finish;
         // end
 
-        if(instruction == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #20 $finish; end
+        if(inst_x == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #10 $finish; end
     end
 
-    memory #(.LOAD_INSTRUCTION_MEM(1)) i_mem (.clk(clk), .address(PC_next), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(i_mem_out));
+    wire[31:0] inst_f;
 
-    PCMux       PCMux(.clk(clk), .PCSel(PCSel), .ALU_out(ALU_out), .PC(PC), .PC_next(PC_next));
+    wire [31:0] PC_f; //start out right before the memory starts
 
-    // alu         alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel), .alu_res(ALU_out));
+    wire RegWE; 
+
+    wire MemRW;
+
+    //fetch_decode
+    wire [31:0] inst_d;
+    wire [31:0] PC_d;
+    wire [4:0] addr_rs1;
+    wire [4:0] addr_rs2;
+    
+    //regfile outputs
+    wire [31:0] data_rs1;
+    wire [31:0] data_rs2;
+    //execute outputs
     wire [31:0] inst_x;
     wire [31:0] PC_x;
-    execute     execute(
-        .clk(clk),
-        .PC_d(PC),
-        .rs1_d(data_rs1),
-        .rs2_d(data_rs2),
-        .inst_d(instruction),
-        .PC_x(PC),
-        .inst_x(inst_x),
-        .ALU_out(ALU_out),
-        .write_data(write_data),
-        .BrEq(BrEq),
-        .BrLt(BrLt)
-    );
-    // memory      d_mem(.clk(clk), .address(ALU_out), .data_in(write_data), .w_enable(MemRW), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
-    mem_stage       mem_stage(
-                        .clk(clk),
-                        .PC_x(PC_x),
-                        .alu_x(ALU_out),
-                        .rs2_x(write_data),
-                        .inst_x(inst_x),
-                        .inst_m(), //connect this later
-                        .wb_m(wb)                        
-    );
+    wire [31:0] rs2_x;
+    wire [31:0] alu_x;
+
+    //mem stage outputs 
+    wire [31:0] wb_m;
+    wire [31:0] inst_m;
+
+    //writeback stage outputs
+    wire [31:0] wb_w;
+    wire [31:0] inst_w;
+    wire [4:0] addr_rd;
+
+    //write stuff
+    //this is where I'll do the printing now (grab the insn from the execute stage since all of these components can be found there)
+    always @(inst_x) begin
+        // for debugging
+        //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
+        //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,dut.execute.imm);
+    
+        $write("%x:  \t%8x    \t", PC_x, inst_x);
+        case(dut.execute.opcode) //output the instruction contents to the console in simulation
+            `LUI: begin
+            // 7'b0110111: begin
+                $display("LUI    x%0d, 0x%0x", addr_rd, dut.execute.imm);
+            end
+            `AUIPC: begin
+                $display("AUIPC  x%0d, 0x%0x", addr_rd, dut.execute.imm);
+            end
+            `JAL: begin
+                
+                $display("JAL    x%0d, %0x", addr_rd, PC_x+dut.execute.imm);
+            end
+            `JALR: begin
+                if (dut.execute.funct3 == 3'b000) begin
+                    $display("JALR   x%0d, %0d(x%0d)", addr_rd, dut.execute.imm,addr_rs1);
+                end
+                else $display("Unknown function:%0b of Type JALR");
+            end
+            `BCC: begin
+                case(dut.execute.funct3)
+                    3'b000: $display("BEQ    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
+                    3'b001: $display("BNE    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
+                    3'b100: $display("BLT    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
+                    3'b101: $display("BGE    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
+                    3'b110: $display("BLTU   x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
+                    3'b111: $display("BGEU    x%0d, x%0d, %0x", addr_rs1, addr_rs2,PC_x+dut.execute.imm);
+                    default: $display("Unknown BCC Type: %0b", dut.execute.funct3);
+                endcase
+            end
+            `LCC: begin
+                case(dut.execute.funct3)
+                    3'b000: $display("LB     %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    3'b001: $display("LH     x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    3'b010: $display("LW     x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    3'b100: $display("LBU    x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    3'b101: $display("LHU    x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    default: $display("Unknown LCC Type: %0b", dut.execute.funct3);
+                endcase
+            end
+            `SCC: begin
+                case(dut.execute.funct3)
+                    3'b000: $display("SB     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
+                    3'b001: $display("SH     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
+                    3'b010: $display("SW     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
+                    default: $display("Unknown SCC Type: %0b", dut.execute.funct3);
+                endcase
+            end
+            //we will always want to sign extend in MCC opcodes
+            `MCC: begin
+                case(dut.execute.funct3)
+                    //I-Type cases
+                    3'b000: $display("ADDI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b010: $display("SLTI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b011: $display("SLTIU  x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b100: $display("XORI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b110: $display("ORI    x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b111: $display("ANDI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    //R-Type cases
+                    3'b001: $display("SLLI   x%0d, x%0d, 0x%0x", addr_rd, addr_rs1, addr_rs2);
+                    3'b101: begin
+                        case(dut.execute.funct7)
+                            7'b0000000: $display("SRLI     x%0d,, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
+                            7'b0100000: $display("SRAI     x%0d, %0d ,x%0d)", addr_rd, addr_rs1, addr_rs2);
+                            default: $display("Unknown MCC shift variant (%b) under funt3=101", dut.execute.funct7); 
+                        endcase
+                    end
+                    default: $display("Unknown MCC opcode: %b", dut.execute.opcode);
+                endcase
+                
+            end
+            `RCC: begin
+                case(dut.execute.funct3)
+                    3'b000:begin
+                        case(dut.execute.funct7)
+                            7'b0000000: $display("ADD    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                            7'b0100000: $display("SUB    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                            default: $display("Unknown RCC shift variant (%b) under funt3=000", dut.execute.funct7); 
+                        endcase
+                    end
+                    3'b001: $display("SLL    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b010: $display("SLT    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b011: $display("SLTU   x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b100: $display("XOR    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b101:begin
+                        case(dut.execute.funct7)
+                            7'b0000000: $display("SRL     x%0d,, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
+                            7'b0100000: $display("SRA     x%0d, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
+                            default: $display("Unknown RCC shift variant (%b) under funct3=101", dut.execute.funct7); 
+                        endcase
+                    end
+                    3'b110: $display("OR     x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b111: $display("AND    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                endcase
+            end
+            `FCC: begin
+                $display("NOP (fence)");
+                //$display("Detected a Fence opcode, these are not implemented so treating as a NOP");
+            end
+            `CCC: begin
+                //$write("Detected a CCC opcode\n");
+                if(inst_x[31:7] == 25'd0) begin $display("ECALL  "); end
+                else $display("Looks an ECALL but doesn't match what I expected: %b", inst_x);
+
+            end
+            default: begin $display(" error"); end
+
+
+        endcase
+
+        $write("\n--------------------------------------\n"); 
+    
+
+    end 
+
+
+
+    PCMux       PCMux(.clk(clk), .PCSel(PCSel), .alu_x(alu_x), .PC_f(PC_f));
+
+    memory #(.LOAD_INSTRUCTION_MEM(1)) i_mem (.clk(clk), .address(PC_f), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(inst_f));
+       
+    
+    
+    fetch_decode fd1(
+            //inputs
+            .clk(clk),
+            .inst_f(inst_f),
+            .PC_f(PC_f),
+            //outputs
+
+            .PC_d(PC_d),
+            .inst_d(inst_d),
+            .addr_rs1(addr_rs1),
+            .addr_rs2(addr_rs2)
+            
+        );
 
     reg_file    reg_file(.clk(clk),
                         .addr_rs1(addr_rs1),
                         .addr_rs2(addr_rs2),
                         .addr_rd(addr_rd),
-                        .data_rd(wb),
+                        .data_rd(wb_w),
                         .data_rs1(data_rs1),
                         .data_rs2(data_rs2),
                         .write_enable(RegWE)
-                        );
+    );
+    execute     execute(
+        .clk(clk),
+        .PC_d(PC_d),
+        .rs1_d(data_rs1),
+        .rs2_d(data_rs2),
+        .inst_d(inst_d),
+        .PC_x(PC_x),
+        .inst_x(inst_x),
+        .alu_x(alu_x),
+        .PCSel(PCSel)
+    );
 
-
-    WBMux       WBMux1(.clk(clk), .dmem(d_mem_out), .alu(ALU_out), .pc_next(PC + 4), .sel(WBSel), .out(wb));
-
-    fetch_decode fd1(
-            //inputs
-            .clk(clk),
-            .instruction(instruction),
-            //outputs
-            .BrEq(BrEq),
-            .BrLt(BrLt),
-            .PC(PC),
-            .addr_rd(addr_rd),
-            .addr_rs1(addr_rs1),
-            .addr_rs2(addr_rs2),
-            .imm(imm),
-            .RdUn(RdUn),
-            .access_size(access_size),
-            .PCSel(PCSel),
-            .BrUn(BrUn),
-            .ASel(ASel),
-            .BSel(BSel),
-            .ALUSel(ALUSel),
-            .MemRW(MemRW),
-            .RegWE(RegWE),
-            .WBSel(WBSel)
-        );
-
-
-
-   
-
+  
     
-    
+    mem_stage       mem_stage(
+                        .clk(clk),
+                        .PC_x(PC_x),
+                        .alu_x(alu_x),
+                        .rs2_x(rs2_x),
+                        .inst_x(inst_x),
+                        .inst_m(inst_m), //connect this later
+                        .wb_m(wb_m)                        
+    );
+
+
+
+    WB_stage    WB(.clk(clk), .wb_m(wb_m), .inst_m(inst_m), .wb_w(wb_w), .inst_w(inst_w), .RegWE(RegWE), .addr_rd(addr_rd));
     // sequential fetching
-    always@(posedge clk) begin
-        instruction <= i_mem_out;
-    end
-
-
+    
     always begin
         #5 clk <= ~clk;
     end
 
-    // //Logging for PD3
-    always @(posedge clk) begin
-    //     //
-
-    //     $write("Execute Stage Signals\n\t");
-    //     $write("PCSel=");
-    //     if(PCSel) $write("PC+4(no branch), ");
-    //     else $write("ALU(branch_addr=%0x), ", ALU_out);
-
-    //     $write("RegWE=");
-    //     if(RegWE) $write("write, ");
-    //     else $write("read, ");
-    //     $write("BrUn=");
-
-    //     if(BrUn) $write("unsigned");
-    //     else $write("signed, ");
-
-    //     $write("BrEq=");
-    //     if(BrEq) $write("equal, ");
-    //     else $write("equal, ");
-
-    //     $write("BrLt=");
-    //     if(BrLt) $write("less than, ");
-    //     else $write("GE(>=), ");
-
-    //     $write("BSel=");
-    //     if(BSel) $write("reg, ");
-    //     else $write("imm, ");
-
-    //     $write("ASel=");
-    //     if(ASel) $write("reg, ");
-    //     else $write("PC, ");
-
-    //     $write("ALUSel=");
-    //     case (ALUSel)
-    //         `ADD: $write("ADD");
-    //         `AND: $write("AND");
-    //         `OR:$write("OR");
-    //         `SLL: $write("SLL");
-    //         `SLT: $write("SLT");
-    //         `SLTU: $write("SLTU");
-    //         `SRA: $write("SRA");
-    //         `SRL: $write("SRL");
-    //         `SUB: $write("SUB");
-    //         `XOR: $write("XOR");
-    //         `LUIOP: $write("LUI");
-    //         `JADD: $write("JumpADD");
-    //         default: $display("Error in ALU mux");
-    //     endcase
-    //     $write("(input1=0x%0x, input2=0x%0x, res=0x%0x) ,", ALU_in1, ALU_in2, ALU_out);
-
-    //     $write("MemRW=");
-    //     if(MemRW) $write("Read, ");
-    //     else $write("Write, ");
-
-    //     $write("WBSel=");
-    //     case(WBSel)
-    //         `MEM: $write("Mem, ");
-    //         `ALU:   $write("ALU, ");
-    //         `PC_NEXT: $write("PC+4, ");
-    //         default: $display("Error in the WB MUX");
-    //     endcase
-    //     $write("\n");
     
-
-        //Regfile logging
-        // $write("RegFile Ports\n\tInput: addr_rs1 = %0d, addr_rs2 = %0d, addr_rd = %0d, data_rd = %0x (%0d), write_enable = %b \n", addr_rs1, addr_rs2, addr_rd, wb, wb, RegWE);
-        // $write("\tOutput: data_rs1 = 0x%0x (%0d), data_rs2 = 0x%0x (%0d)\n",data_rs1, data_rs1, data_rs2, data_rs2);
-        
-        // $write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, imm(b)= %0b, imm=%d\n",
-        //     dut.execute.opcode, 
-        //     dut.execute.funct3,
-        //     dut.execute.funct7, 
-        //     addr_rd, 
-        //     addr_rs1, 
-        //     addr_rs2,dut.execute.imm,
-        //     dut.execute.imm);
-
-        $write("\n--------------------------------------\n"); 
-    end
 
 endmodule
 
 
-
-module PCMux(clk, PCSel, ALU_out, PC, PC_next);
+// fetch stage essentially
+module PCMux(clk, PCSel, alu_x, PC_f);
 
     input clk;
     input PCSel;
-    input [31:0]ALU_out;
-    output [31:0] PC;
-    output [31:0] PC_next;
+    input [31:0]alu_x;
+    output reg [31:0] PC_f;
     
-    reg [31:0] PC = 32'h01000000-4;
-    reg [31:0] PC_next;
-    
-    // assign PC_next = PCSel? PC+4:ALU_out;
+    initial begin
+        PC_f = 32'h01000000;
+    end
 
     always@(posedge clk) begin
-        PC <= PC_next;
-    end
-    always@(*) begin
-        
         if(PCSel)
-            PC_next <= PC + 4;
+            PC_f <= alu_x;
         else 
-            PC_next <= ALU_out;
+            //if we do this we need to nop out the fetch and decode stage
+            PC_f <= PC_f + 4;
     end
 endmodule
 
+module WB_stage(clk, wb_m, inst_m, wb_w, inst_w, RegWE, addr_rd);
 
-
-// endmodule
-
-module WBMux (clk, dmem, alu, pc_next, sel, out);
     input clk;
-    input [31:0] dmem;
-    input [31:0] alu;
-    input [31:0] pc_next;
-    input [1:0] sel;
+    input [31:0] wb_m;
+    input [31:0] inst_m;
+    output reg [31:0] wb_w;
+    output reg [31:0] inst_w;
+    output wire RegWE;
+    output wire [4:0] addr_rd;
 
-    output reg [31:0] out;
+    wire [6:0] opcode;
+    
+    assign addr_rd = inst_w[11:7];
+    assign opcode = inst_w[6:0];
+    assign RegWE = (opcode == `BCC || opcode == `SCC)? 0 : 1;
 
+
+    //change to posedge clk for pipelined
     always@(*) begin
-        case(sel)
-            `MEM: out <= dmem;
-            `ALU: out <= alu;
-            `PC_NEXT: out <= pc_next;
-            default: $display("Error in the WB MUX");
-        endcase
-    end 
+        wb_w <= wb_m;
+        inst_w <= inst_m;
+    end
+
 
 
 endmodule
 
-//Reg file monitoring output
