@@ -28,6 +28,10 @@
 `define LUIOP 11
 `define JADD 12
 
+//ALUinput mux bypass ops
+`define MX 2'd0
+`define WX 2'd1
+`define NONE 2'd2
 
 //WBSel options
 `define MEM 2'd0

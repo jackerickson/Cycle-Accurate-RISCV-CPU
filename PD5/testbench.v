@@ -48,15 +48,17 @@ module dut;
         if(inst_x == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #10 $finish; end
     end
 
+
+    //Fwding ctl logic signals
+    reg [1:0] ALU_in1_bypass;
+    reg [1:0] ALU_in2_bypass;
+    wire WM_bypass;
+
+    //fetch stage internals
     wire[31:0] inst_f;
+    wire [31:0] PC_f;
 
-    wire [31:0] PC_f; //start out right before the memory starts
-
-    wire RegWE; 
-
-    wire MemRW;
-
-    //fetch_decode
+    //fetch_decode outputs
     wire [31:0] inst_d;
     wire [31:0] PC_d;
     wire [4:0] addr_rs1;
@@ -74,14 +76,15 @@ module dut;
     //mem stage outputs 
     wire [31:0] wb_m;
     wire [31:0] inst_m;
+    wire [31:0] alu_m_bypass;
 
     //writeback stage outputs
     wire [31:0] wb_w;
     wire [31:0] inst_w;
     wire [4:0] addr_rd;
+    wire RegWE; 
 
-    //write stuff
-    //this is where I'll do the printing now (grab the insn from the execute stage since all of these components can be found there)
+    //LOGGING 
     always @(posedge clk) begin
         // for debugging
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
@@ -194,7 +197,6 @@ module dut;
             end
             default: begin $display(" error"); end
 
-
         endcase
 
         $write("\n--------------------------------------\n"); 
@@ -202,7 +204,18 @@ module dut;
 
     end 
 
+    assign WM_bypass = (inst_m[11:7]==inst_w[11:7]) ? 1:0;
 
+    always(*) begin
+        if (inst_x[19:15] == inst_m[11:7]) ALU_in1_bypass <= `MX;
+        else if (inst_x[19:15] == inst_w[11:7]) ALU_in1_bypass <= `WX;
+        else ALU_in1_bypass <= `NONE;
+
+        if (inst_x[24:20] == inst_m[11:7]) ALU_in2_bypass <= `MX;
+        else if (inst_x[24:20] == inst_w[11:7]) ALU_in2_bypass <= `WX;
+        else ALU_in2_bypass <= `NONE;
+
+    end
 
     PCMux       PCMux(.clk(clk), .PCSel(PCSel), .alu_x(alu_x), .PC_f(PC_f));
 
@@ -239,6 +252,9 @@ module dut;
         .rs1_d(data_rs1),
         .rs2_d(data_rs2),
         .inst_d(inst_d),
+        .wb_w_bypass(wb_w),
+        .alu_m_bypass(alu_m_bypass)
+        //outputs
         .PC_x(PC_x),
         .inst_x(inst_x),
         .alu_x(alu_x),
@@ -254,8 +270,11 @@ module dut;
                         .alu_x(alu_x),
                         .rs2_x(rs2_x),
                         .inst_x(inst_x),
-                        .inst_m(inst_m), //connect this later
-                        .wb_m(wb_m)                        
+                        .wb_w_bypass(wb_w),
+
+                        .inst_m(inst_m), 
+                        .wb_m(wb_m),       
+                        .alu_m(alu_m_bypass)                 
     );
 
 

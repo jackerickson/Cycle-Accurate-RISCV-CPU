@@ -4,6 +4,8 @@ module execute(
     input [31:0] rs1_d,
     input [31:0] rs2_d,
     input [31:0] inst_d,
+    input [31:0] wb_w_bypass,
+    input [31:0] alu_m_bypass,
 
     output wire [31:0] PC_x,
     output wire [31:0] inst_x,
@@ -38,9 +40,6 @@ module execute(
 
 
 
-    // input A and input B muxes
-    assign ALU_in1 = ASel ? rs1 : PC_x;
-    assign ALU_in2 = BSel ? rs2 : imm;
 
     // //register the inputs
     always @(posedge clk) begin
@@ -66,6 +65,37 @@ module execute(
     // BrMux
     assign BrEq = (rs1 == rs2);
     assign BrLt = BrUn ? (rs1 < rs2): ($signed(rs1) < $signed(rs2));
+
+    
+    //These have to become always blocks, bigger muxes that take control logic
+    //maybe make fwding ctl provide a seperate signal like bypassSel, which says to either use  
+
+    // input A and input B muxes
+    //assign ALU_in1 = ASel ? rs1 : PC_x;
+    assign ALU_in2 = BSel ? rs2 : imm;
+
+    always(*) begin
+        case(ALU_in1_bypass):
+            `MX: ALU_in1 <= alu_m_bypass;
+            `WX: ALU_in1 <= wb_w_bypass;
+            default: begin
+                if (ASel) ALU_in1 <= rs1;
+                else ALU_in1 <= PC_x;
+            end
+        endcase
+        case(ALU_in2_bypass):
+            `MX: ALU_in2 <= alu_m_bypass;
+            `WX: ALU_in2 <= wb_w_bypass;
+            default: begin
+                if (ASel) ALU_in2 <= rs1;
+                else ALU_in2 <= PC_x;
+            end
+        endcase
+                
+
+    end
+
+
 
     //multi-case assigns
     always @(*) begin
@@ -93,14 +123,13 @@ module execute(
                 endcase
             end
             `JAL, `JALR: ALUSel <= `JADD;
-            `LUI: begin ALUSel <= `LUIOP; $display("LUIOP"); end
+            `LUI: ALUSel <= `LUIOP; 
             default: ALUSel <= `ADD;
         endcase
     end
+
+    //immediate generation
     always @(inst_x) begin
-        //immediate generation
-        // 1000 0000 0000 0000 0000 1110 1011 0111
-        // 1000 0000 0000 0000 0000 1110 1011 0111
         case (opcode)
             `LUI: decode_uType();
             `AUIPC: decode_uType();
@@ -112,8 +141,9 @@ module execute(
             default: decode_rType();
         endcase
     end
+
+    //PCSel
     always @(*) begin
-        //PCSel
         case  (opcode)
             `JAL, `JALR: PCSel <= 1;
             `BCC: begin
