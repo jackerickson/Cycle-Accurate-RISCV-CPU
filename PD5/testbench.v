@@ -33,33 +33,18 @@ module dut;
 
     // simulation end conditions
 
-    always@(*) begin
-        
-        // if(wb == 32'h0101_1111 && addr_rd == 2) begin
-        // end
+    always@(posedge clk) begin
 
-        // if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.fd1.opcode == `JALR) begin 
-        //     $display("Returning to SP at end of memory, terminating simulation.");
+        if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.execute.opcode == `JALR) begin 
+            $display("Returning to SP at end of memory, terminating simulation.");
             
         //     // // $display("Contents of regfile: ");
         //     // for (i=0;i<32;i++) begin
         //     //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
         //     // end
-        //     #20 $finish;
-        // end
-            // $finish;
-
-
-        if(inst_x[6:0] == `CCC) begin $display("ECALL detected, ending sim"); #5 $finish; end
-
+            $finish;
+        end
         if(inst_x == 32'd0) #5 $finish;
-
-        // if(PC_fetch == 32'h0000_0000) begin
-        //     $display("PC_fetch is blank, exiting since no more instructions");
-        //     //write_reg_contents <= 1;
-        //     $finish;
-        // end
-
         if(inst_x == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #10 $finish; end
     end
 
@@ -97,7 +82,7 @@ module dut;
 
     //write stuff
     //this is where I'll do the printing now (grab the insn from the execute stage since all of these components can be found there)
-    always @(inst_x) begin
+    always @(posedge clk) begin
         // for debugging
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
         //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,dut.execute.imm);
@@ -203,7 +188,7 @@ module dut;
             end
             `CCC: begin
                 //$write("Detected a CCC opcode\n");
-                if(inst_x[31:7] == 25'd0) begin $display("ECALL  "); end
+                if(inst_x[31:7] == 25'd0) begin $display("ECALL  "); #5 $finish; end
                 else $display("Looks an ECALL but doesn't match what I expected: %b", inst_x);
 
             end
@@ -257,6 +242,7 @@ module dut;
         .PC_x(PC_x),
         .inst_x(inst_x),
         .alu_x(alu_x),
+        .rs2_x(rs2_x),
         .PCSel(PCSel)
     );
 
@@ -313,12 +299,13 @@ module WB_stage(clk, wb_m, inst_m, wb_w, inst_w, RegWE, addr_rd);
     input [31:0] wb_m;
     input [31:0] inst_m;
     output reg [31:0] wb_w;
-    output reg [31:0] inst_w;
+    output [31:0] inst_w;
     output wire RegWE;
     output wire [4:0] addr_rd;
 
     wire [6:0] opcode;
-    
+    reg [31:0] inst_w;
+
     assign addr_rd = inst_w[11:7];
     assign opcode = inst_w[6:0];
     assign RegWE = (opcode == `BCC || opcode == `SCC)? 0 : 1;

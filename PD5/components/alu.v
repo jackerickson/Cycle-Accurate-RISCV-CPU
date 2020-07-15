@@ -32,7 +32,7 @@ module alu(
             `XOR: alu_res = rs1 ^ rs2;
             `LUIOP: alu_res = rs2;
             `JADD: alu_res = ($signed(rs1) + $signed(rs2) & (32'hffff_ffff - 32'd1));
-            default: $display("Error in ALU mux");
+            default: begin alu_res =   $signed(rs1) + $signed(rs2); $display("Error in ALU mux %0d", ALUsel); end
         endcase
             
         

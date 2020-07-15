@@ -8,23 +8,17 @@ module mem_stage(
     output [31:0] inst_m ,
     output reg [31:0] wb_m
 );
-
-
-    wire WEn = 0;
-    
-    // opcode parts
+    wire WEn;
     wire [2:0]funct3;
-    reg [1:0] access_size;
+    wire [6:0] opcode;
     wire RdUn;
+    wire [31:0] d_mem_out;
+    reg [1:0] access_size;
     reg [31:0]alu_m;
     reg [31:0]rs2_m;
     reg [31:0]PC_m;
-    wire [31:0] d_mem_out;
-
     
     reg [31:0] inst_m;
-
-
 
     assign opcode = inst_m[6:0];
     assign funct3 = inst_m[14:12];
@@ -34,7 +28,7 @@ module mem_stage(
     assign RdUn = (funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
 
 
-    assign WEn = (inst_m[6:0] == `SCC)? 1:0; // if opcode is SX
+    assign WEn = (opcode == `SCC)? 1 :0; // if opcode is SX
     
     memory      d_mem(.clk(clk), .address(alu_m), .data_in(rs2_m), .w_enable(WEn), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
     //change to posedge clk when piplining
@@ -59,7 +53,7 @@ module mem_stage(
     always@(*) begin
         case(funct3)
             3'b000, 3'b100: access_size <= `BYTE;
-            // 3'b001, 3'101: access_size <= `HALFWORD;
+            3'b001, 3'b101: access_size <= `HALFWORD;
             default: access_size <= `WORD;
         endcase
     end

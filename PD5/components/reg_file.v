@@ -15,6 +15,9 @@ module reg_file(
     // //setup var
     integer i;
 
+    reg [31:0] reg2;
+
+    
     //initialize to 0
     initial begin
         for(i=0; i < 32; i++) begin
@@ -30,30 +33,10 @@ module reg_file(
 
     end
     
-    // reg state = 0;
-    // always @(user_reg[2]) begin
-    //     if (user_reg[2] == 32'h0101_1111) begin
-    //         if(!state) state <= 1;
-    //         else begin
-    //             $display("Contents of regfile: ");
-    //             for (i=0;i<32;i++) begin
-    //                 $display("r%0d = %0x", i, user_reg[i]);
-    //             end
-    //             $finish;
-    //         end
-            
-    //     end
-    // end
-
-
-
-
     // Reads Combinational
     assign data_rs1 = user_reg[addr_rs1];
     assign data_rs2 = user_reg[addr_rs2];
     // Writes Sequential
-
-    
 
     always@(posedge clk)
     begin
@@ -65,7 +48,7 @@ module reg_file(
     
     end
 
-    
+    always @(*) reg2 <= user_reg[2];
 
 
 endmodule
