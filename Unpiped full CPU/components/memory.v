@@ -3,7 +3,7 @@
 // `define source "components/simple-programs/fact.x" //Binary file to load Memory from
 // `define source "components/individual-instructions/rv32ui-p-srai.x" 
 `define source "temp.x" //used for batch running so I can run multiple tests at once
-
+`define relevant_addr 32'h010002c4
 module memory(
     input clk,
     input [31:0] address,
@@ -52,13 +52,14 @@ module memory(
                 mem[(4*i)+3+start_address] = t_reg[31:24];
             end     
         end
-        //$display("Memory at %x: %x%x%x%x", relevant_addr,  mem[relevant_addr + 32'd3], mem [relevant_addr + 32'd2], mem[ relevant_addr + 32'd1], mem[relevant_addr ]);
+
+        $display("Memory at %x: %x%x%x%x", `relevant_addr,  mem[`relevant_addr + 32'd3], mem [`relevant_addr + 32'd2], mem[ `relevant_addr + 32'd1], mem[`relevant_addr ]);
         
     end 
 
 
     // Reads Combinational
-    always @(w_enable, address)
+    always @(w_enable, address, access_size,RdUn)
     begin
 
         if (address >= start_address && address < (start_address + mem_size)) begin

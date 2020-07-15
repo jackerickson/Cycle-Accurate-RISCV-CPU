@@ -1,56 +1,71 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Thu Jun 11 23:44:04 2020
+[*] Wed Jul 15 03:24:25 2020
 [*]
-[dumpfile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbench.vcd"
-[dumpfile_mtime] "Thu Jun 11 23:44:01 2020"
-[dumpfile_size] 21382
-[savefile] "D:\Onedrive\uWaterloo\4th Year\ECE 429 Computer Architecture\ece429_shared\PD3\testbenchWaves.gtkw"
-[timestart] 178
-[size] 958 1008
-[pos] 0 7
-*-4.168257 203 265 165 195 205 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
+[dumpfile_mtime] "Wed Jul 15 03:23:36 2020"
+[dumpfile_size] 28679
+[savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves.gtkw"
+[timestart] 0
+[size] 1920 1017
+[pos] -1 -1
+*-4.168257 14 305 245 785 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dut.
+[treeopen] dut.execute.
 [sst_width] 197
-[signals_width] 166
+[signals_width] 227
 [sst_expanded] 1
-[sst_vpaned_height] 296
+[sst_vpaned_height] 299
 @28
 [color] 1
 dut.clk
+@22
+dut.alu_x[31:0]
 @200
 -ALU inputs
 @22
-dut.ALUSel[3:0]
-@24
-dut.ALU_in1[31:0]
-dut.ALU_in2[31:0]
-@22
-dut.ALU_out[31:0]
-@28
-dut.ASel
-dut.BSel
-dut.BrEq
-dut.BrUn
-dut.BrLt
+dut.execute.ALUSel[3:0]
+dut.execute.ALU_in1[31:0]
+dut.execute.ALU_in2[31:0]
+dut.execute.rs1[31:0]
+dut.execute.rs1_d[31:0]
 @420
 [color] 3
 dut.PCSel
+@200
+-X decode sigs
+-Decode signals
 @28
-dut.WBSel[1:0]
+dut.execute.PCSel
 @22
-[color] 2
-dut.PC[31:0]
-dut.PC_next[31:0]
+dut.execute.imm[31:0]
+@24
+dut.execute.ALUSel[3:0]
+@22
+dut.execute.opcode[6:0]
 @28
+dut.execute.ASel
+dut.execute.BrUn
+dut.execute.BrEq
+dut.execute.BrLt
+dut.execute.BSel
+@22
+dut.PC_x[31:0]
+dut.inst_x[31:0]
+@28
+[color] 2
 dut.RegWE
+@420
+dut.execute.imm[31:0]
+@22
+dut.execute.imm[31:0]
 @200
 -Dest
+@22
+dut.wb_w[31:0]
 @24
 [color] 1
 dut.addr_rd[4:0]
-@22
-dut.wb[31:0]
 @200
 -rs1
 @24
@@ -65,27 +80,14 @@ dut.addr_rs2[4:0]
 @22
 [color] 1
 dut.data_rs2[31:0]
-@28
-dut.MemRW
-@23
-dut.i_mem_out[31:0]
-@24
-dut.imm[31:0]
-@22
-dut.instruction[31:0]
 @200
 -D_MEM
-@28
-dut.d_mem.RdUn
-dut.d_mem.access_size[1:0]
+@24
+dut.mem_stage.access_size[1:0]
 @22
-dut.d_mem.address[31:0]
+dut.mem_stage.alu_m[31:0]
+dut.mem_stage.d_mem_out[31:0]
 @28
-dut.d_mem.clk
-@22
-dut.d_mem.data_in[31:0]
-dut.d_mem.data_out[31:0]
-@28
-dut.d_mem.w_enable
+dut.mem_stage.WEn
 [pattern_trace] 1
 [pattern_trace] 0
