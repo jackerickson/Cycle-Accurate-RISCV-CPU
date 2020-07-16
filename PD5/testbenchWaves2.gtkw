@@ -1,0 +1,72 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Thu Jul 16 04:56:30 2020
+[*]
+[dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
+[dumpfile_mtime] "Thu Jul 16 04:54:38 2020"
+[dumpfile_size] 13156352
+[savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves2.gtkw"
+[timestart] 90
+[size] 1920 1017
+[pos] -1 -1
+*-4.168257 146 305 245 785 45 35 25 15 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dut.
+[treeopen] dut.execute.
+[sst_width] 197
+[signals_width] 227
+[sst_expanded] 1
+[sst_vpaned_height] 299
+@28
+dut.clk
+@200
+-Fetch
+@22
+dut.PCMux.PC_f[31:0]
+dut.inst_f[31:0]
+@28
+dut.PCMux.PCSel
+@200
+-Decode
+@22
+dut.PC_d[31:0]
+dut.inst_d[31:0]
+@200
+-
+-Execute
+@22
+dut.PC_x[31:0]
+dut.inst_x[31:0]
+dut.execute.rs1[31:0]
+dut.execute.rs2[31:0]
+dut.execute.ALU_in1[31:0]
+dut.execute.ALU_in2[31:0]
+@28
+dut.execute.ALU_in1_bypass[1:0]
+dut.execute.ALU_in2_bypass[1:0]
+@420
+dut.execute.imm[31:0]
+@22
+dut.execute.imm[31:0]
+@28
+dut.execute.BrLt
+dut.execute.BrEq
+dut.execute.BrUn
+@29
+dut.execute.kill_dx
+@200
+-
+-Memory
+@22
+dut.mem_stage.PC_m[31:0]
+dut.inst_m[31:0]
+@200
+-Writeback
+@22
+dut.inst_w[31:0]
+@28
+dut.WB.RegWE
+@22
+dut.WB.addr_rd[4:0]
+dut.WB.wb_w[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

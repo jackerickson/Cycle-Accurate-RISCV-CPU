@@ -45,14 +45,23 @@ module dut;
             $finish;
         end
         if(inst_x == 32'd0) #5 $finish;
-        if(inst_x == 32'hbadbadff)begin $display("Exiting: Instruction memory returned out of range"); #10 $finish; end
+        if(inst_x == 32'hbadbadff)begin 
+            if(PC_x != 32'h01000000 - 4) begin
+                $display("Exiting: Instruction memory returned out of range"); 
+                #10 $finish;
+            end
+        end
     end
 
 
     //Fwding ctl logic signals
-    reg [1:0] ALU_in1_bypass;
-    reg [1:0] ALU_in2_bypass;
+    reg [1:0] rs1_bypass;
+    reg [1:0] rs2_bypass;
     wire WM_bypass;
+
+    //Hazard ctl
+    wire stall;
+    wire [31:0] hazard_mux_out;
 
     //fetch stage internals
     wire[31:0] inst_f;
@@ -72,6 +81,7 @@ module dut;
     wire [31:0] PC_x;
     wire [31:0] rs2_x;
     wire [31:0] alu_x;
+    wire kill_dx;
 
     //mem stage outputs 
     wire [31:0] wb_m;
@@ -88,53 +98,53 @@ module dut;
     always @(posedge clk) begin
         // for debugging
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
-        //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b, addr_rd=x%0d, addr_rs1=x%0d, addr_rs2=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7, addr_rd, addr_rs1, addr_rs2,dut.execute.imm);
+        //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b,inst_x[11:7]=x%0d, inst_x[19:15]=x%0d, inst_x[24:20]=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7,inst_x[11:7], inst_x[19:15], inst_x[24:20],dut.execute.imm);
     
         $write("%x:  \t%8x    \t", PC_x, inst_x);
         case(dut.execute.opcode) //output the instruction contents to the console in simulation
             `LUI: begin
             // 7'b0110111: begin
-                $display("LUI    x%0d, 0x%0x", addr_rd, dut.execute.imm);
+                $display("LUI    x%0d, 0x%0x",inst_x[11:7], dut.execute.imm);
             end
             `AUIPC: begin
-                $display("AUIPC  x%0d, 0x%0x", addr_rd, dut.execute.imm);
+                $display("AUIPC  x%0d, 0x%0x",inst_x[11:7], dut.execute.imm);
             end
             `JAL: begin
                 
-                $display("JAL    x%0d, %0x", addr_rd, PC_x+dut.execute.imm);
+                $display("JAL    x%0d, %0x",inst_x[11:7], PC_x+dut.execute.imm);
             end
             `JALR: begin
                 if (dut.execute.funct3 == 3'b000) begin
-                    $display("JALR   x%0d, %0d(x%0d)", addr_rd, dut.execute.imm,addr_rs1);
+                    $display("JALR   x%0d, %0d(x%0d)",inst_x[11:7], dut.execute.imm,inst_x[19:15]);
                 end
                 else $display("Unknown function:%0b of Type JALR");
             end
             `BCC: begin
                 case(dut.execute.funct3)
-                    3'b000: $display("BEQ    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
-                    3'b001: $display("BNE    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
-                    3'b100: $display("BLT    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
-                    3'b101: $display("BGE    x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
-                    3'b110: $display("BLTU   x%0d, x%0d, %0x", addr_rs1, addr_rs2, PC_x+dut.execute.imm);
-                    3'b111: $display("BGEU    x%0d, x%0d, %0x", addr_rs1, addr_rs2,PC_x+dut.execute.imm);
+                    3'b000: $display("BEQ    x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20], PC_x+dut.execute.imm);
+                    3'b001: $display("BNE    x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20], PC_x+dut.execute.imm);
+                    3'b100: $display("BLT    x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20], PC_x+dut.execute.imm);
+                    3'b101: $display("BGE    x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20], PC_x+dut.execute.imm);
+                    3'b110: $display("BLTU   x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20], PC_x+dut.execute.imm);
+                    3'b111: $display("BGEU    x%0d, x%0d, %0x", inst_x[19:15], inst_x[24:20],PC_x+dut.execute.imm);
                     default: $display("Unknown BCC Type: %0b", dut.execute.funct3);
                 endcase
             end
             `LCC: begin
                 case(dut.execute.funct3)
-                    3'b000: $display("LB     %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
-                    3'b001: $display("LH     x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
-                    3'b010: $display("LW     x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
-                    3'b100: $display("LBU    x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
-                    3'b101: $display("LHU    x%0d, %0d(x%0d)", addr_rd, dut.execute.imm, addr_rs1);
+                    3'b000: $display("LB     %0d(x%0d)",inst_x[11:7], dut.execute.imm, inst_x[19:15]);
+                    3'b001: $display("LH     x%0d, %0d(x%0d)",inst_x[11:7], dut.execute.imm, inst_x[19:15]);
+                    3'b010: $display("LW     x%0d, %0d(x%0d)",inst_x[11:7], dut.execute.imm, inst_x[19:15]);
+                    3'b100: $display("LBU    x%0d, %0d(x%0d)",inst_x[11:7], dut.execute.imm, inst_x[19:15]);
+                    3'b101: $display("LHU    x%0d, %0d(x%0d)",inst_x[11:7], dut.execute.imm, inst_x[19:15]);
                     default: $display("Unknown LCC Type: %0b", dut.execute.funct3);
                 endcase
             end
             `SCC: begin
                 case(dut.execute.funct3)
-                    3'b000: $display("SB     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
-                    3'b001: $display("SH     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
-                    3'b010: $display("SW     x%0d, %0d(x%0d)", addr_rs2, dut.execute.imm, addr_rs1);
+                    3'b000: $display("SB     x%0d, %0d(x%0d)", inst_x[24:20], dut.execute.imm, inst_x[19:15]);
+                    3'b001: $display("SH     x%0d, %0d(x%0d)", inst_x[24:20], dut.execute.imm, inst_x[19:15]);
+                    3'b010: $display("SW     x%0d, %0d(x%0d)", inst_x[24:20], dut.execute.imm, inst_x[19:15]);
                     default: $display("Unknown SCC Type: %0b", dut.execute.funct3);
                 endcase
             end
@@ -142,18 +152,18 @@ module dut;
             `MCC: begin
                 case(dut.execute.funct3)
                     //I-Type cases
-                    3'b000: $display("ADDI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
-                    3'b010: $display("SLTI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
-                    3'b011: $display("SLTIU  x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
-                    3'b100: $display("XORI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
-                    3'b110: $display("ORI    x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
-                    3'b111: $display("ANDI   x%0d, x%0d, %0d", addr_rd, addr_rs1, dut.execute.imm);
+                    3'b000: $display("ADDI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b010: $display("SLTI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b011: $display("SLTIU  x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b100: $display("XORI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b110: $display("ORI    x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b111: $display("ANDI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
                     //R-Type cases
-                    3'b001: $display("SLLI   x%0d, x%0d, 0x%0x", addr_rd, addr_rs1, addr_rs2);
+                    3'b001: $display("SLLI   x%0d, x%0d, 0x%0x",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                     3'b101: begin
                         case(dut.execute.funct7)
-                            7'b0000000: $display("SRLI     x%0d,, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
-                            7'b0100000: $display("SRAI     x%0d, %0d ,x%0d)", addr_rd, addr_rs1, addr_rs2);
+                            7'b0000000: $display("SRLI     x%0d,, %0d ,%0d)",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                            7'b0100000: $display("SRAI     x%0d, %0d ,x%0d)",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                             default: $display("Unknown MCC shift variant (%b) under funt3=101", dut.execute.funct7); 
                         endcase
                     end
@@ -165,24 +175,24 @@ module dut;
                 case(dut.execute.funct3)
                     3'b000:begin
                         case(dut.execute.funct7)
-                            7'b0000000: $display("ADD    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
-                            7'b0100000: $display("SUB    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                            7'b0000000: $display("ADD    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                            7'b0100000: $display("SUB    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                             default: $display("Unknown RCC shift variant (%b) under funt3=000", dut.execute.funct7); 
                         endcase
                     end
-                    3'b001: $display("SLL    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
-                    3'b010: $display("SLT    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
-                    3'b011: $display("SLTU   x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
-                    3'b100: $display("XOR    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b001: $display("SLL    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                    3'b010: $display("SLT    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                    3'b011: $display("SLTU   x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                    3'b100: $display("XOR    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                     3'b101:begin
                         case(dut.execute.funct7)
-                            7'b0000000: $display("SRL     x%0d,, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
-                            7'b0100000: $display("SRA     x%0d, %0d ,%0d)", addr_rd, addr_rs1, addr_rs2);
+                            7'b0000000: $display("SRL     x%0d,, %0d ,%0d)",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                            7'b0100000: $display("SRA     x%0d, %0d ,%0d)",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                             default: $display("Unknown RCC shift variant (%b) under funct3=101", dut.execute.funct7); 
                         endcase
                     end
-                    3'b110: $display("OR     x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
-                    3'b111: $display("AND    x%0d, x%0d, x%0d", addr_rd, addr_rs1, addr_rs2);
+                    3'b110: $display("OR     x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
+                    3'b111: $display("AND    x%0d, x%0d, x%0d",inst_x[11:7], inst_x[19:15], inst_x[24:20]);
                 endcase
             end
             `FCC: begin
@@ -205,15 +215,17 @@ module dut;
     end 
 
     assign WM_bypass = (inst_m[11:7]==inst_w[11:7]) ? 1:0;
+    assign stall = ((inst_x[6:0] == `LCC) && ((inst_d[19:5] == inst_x[11:7]) || (inst_d[6:0] != `SCC)))? 1: 0;
+    assign hazard_mux_out = (stall)? 32'h13 : inst_d;
 
-    always(*) begin
-        if (inst_x[19:15] == inst_m[11:7]) ALU_in1_bypass <= `MX;
-        else if (inst_x[19:15] == inst_w[11:7]) ALU_in1_bypass <= `WX;
-        else ALU_in1_bypass <= `NONE;
+    always @(*) begin
+        if (inst_x[19:15] == inst_m[11:7]) rs1_bypass <= `MX;
+        else if (inst_x[19:15] == inst_w[11:7]) rs1_bypass <= `WX;
+        else rs1_bypass <= `NONE;
 
-        if (inst_x[24:20] == inst_m[11:7]) ALU_in2_bypass <= `MX;
-        else if (inst_x[24:20] == inst_w[11:7]) ALU_in2_bypass <= `WX;
-        else ALU_in2_bypass <= `NONE;
+        if (inst_x[24:20] == inst_m[11:7]) rs2_bypass <= `MX;
+        else if (inst_x[24:20] == inst_w[11:7]) rs2_bypass <= `WX;
+        else rs2_bypass <= `NONE;
 
     end
 
@@ -228,6 +240,7 @@ module dut;
             .clk(clk),
             .inst_f(inst_f),
             .PC_f(PC_f),
+            .kill_dx(kill_dx),
             //outputs
 
             .PC_d(PC_d),
@@ -251,15 +264,18 @@ module dut;
         .PC_d(PC_d),
         .rs1_d(data_rs1),
         .rs2_d(data_rs2),
-        .inst_d(inst_d),
+        .inst_d(hazard_mux_out),
         .wb_w_bypass(wb_w),
-        .alu_m_bypass(alu_m_bypass)
+        .alu_m_bypass(alu_m_bypass),
+        .rs1_bypass(rs1_bypass),
+        .rs2_bypass(rs2_bypass),
         //outputs
         .PC_x(PC_x),
         .inst_x(inst_x),
         .alu_x(alu_x),
         .rs2_x(rs2_x),
-        .PCSel(PCSel)
+        .PCSel(PCSel),
+        .kill_dx(kill_dx)
     );
 
   
@@ -271,6 +287,7 @@ module dut;
                         .rs2_x(rs2_x),
                         .inst_x(inst_x),
                         .wb_w_bypass(wb_w),
+                        .WM_bypass(WM_bypass),
 
                         .inst_m(inst_m), 
                         .wb_m(wb_m),       
@@ -292,23 +309,32 @@ endmodule
 
 
 // fetch stage essentially
-module PCMux(clk, PCSel, alu_x, PC_f);
+module PCMux(clk, PCSel, stall, alu_x, PC_f);
 
     input clk;
     input PCSel;
+    input stall;
     input [31:0]alu_x;
     output reg [31:0] PC_f;
     
     initial begin
-        PC_f = 32'h01000000;
+        PC_f <= 32'h01000000 - 4;
     end
 
     always@(posedge clk) begin
+        // if(!stall) begin
+        //     if(PCSel)
+        //         PC_f <= alu_x;
+        //     else 
+        //         //if we do this we need to nop out the fetch and decode stage
+        //         PC_f <= PC_f + 4;
+        // end
+        // else PC_f <= PC_f;
         if(PCSel)
-            PC_f <= alu_x;
-        else 
-            //if we do this we need to nop out the fetch and decode stage
-            PC_f <= PC_f + 4;
+                PC_f <= alu_x;
+            else 
+                //if we do this we need to nop out the fetch and decode stage
+                PC_f <= PC_f + 4;
     end
 endmodule
 
@@ -325,13 +351,15 @@ module WB_stage(clk, wb_m, inst_m, wb_w, inst_w, RegWE, addr_rd);
     wire [6:0] opcode;
     reg [31:0] inst_w;
 
+    
+
     assign addr_rd = inst_w[11:7];
     assign opcode = inst_w[6:0];
     assign RegWE = (opcode == `BCC || opcode == `SCC)? 0 : 1;
 
 
     //change to posedge clk for pipelined
-    always@(*) begin
+    always@(posedge clk) begin
         wb_w <= wb_m;
         inst_w <= inst_m;
     end

@@ -1,10 +1,10 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Wed Jul 15 03:24:25 2020
+[*] Thu Jul 16 00:53:55 2020
 [*]
 [dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
-[dumpfile_mtime] "Wed Jul 15 03:23:36 2020"
-[dumpfile_size] 28679
+[dumpfile_mtime] "Thu Jul 16 00:52:21 2020"
+[dumpfile_size] 606208
 [savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves.gtkw"
 [timestart] 0
 [size] 1920 1017
@@ -50,7 +50,10 @@ dut.execute.BrEq
 dut.execute.BrLt
 dut.execute.BSel
 @22
+dut.PC_d[31:0]
+dut.PC_f[31:0]
 dut.PC_x[31:0]
+dut.mem_stage.PC_m[31:0]
 dut.inst_x[31:0]
 @28
 [color] 2
@@ -89,5 +92,15 @@ dut.mem_stage.alu_m[31:0]
 dut.mem_stage.d_mem_out[31:0]
 @28
 dut.mem_stage.WEn
+dut.PCMux.PCSel
+@22
+dut.PCMux.PC_f[31:0]
+@29
+dut.stall
+@22
+dut.PCMux.alu_x[31:0]
+@28
+dut.PCMux.clk
+dut.PCMux.stall
 [pattern_trace] 1
 [pattern_trace] 0

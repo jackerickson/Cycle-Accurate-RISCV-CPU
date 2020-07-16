@@ -5,11 +5,15 @@ module mem_stage(
     input [31:0] rs2_x,
     input [31:0] inst_x,
     input [31:0] wb_w_bypass,
+    input WM_bypass,
 
     output [31:0] inst_m ,
     output reg [31:0] wb_m,
     output [31:0] alu_m
 );
+
+
+    
     wire WEn;
     wire [2:0]funct3;
     wire [6:0] opcode;
@@ -38,7 +42,7 @@ module mem_stage(
     
     memory      d_mem(.clk(clk), .address(alu_m), .data_in(DataW), .w_enable(WEn), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
     //change to posedge clk when piplining
-    always @(*) begin
+    always @(posedge clk) begin
         inst_m <= inst_x;
         rs2_m <= rs2_x;
         alu_m <= alu_x;
@@ -47,7 +51,7 @@ module mem_stage(
 
     //might want to put RegRW control here then pass it on too...
     //WBMux
-    always@(*) begin
+    always @(*) begin
         case(inst_x[6:0])
             `LCC:  wb_m <= d_mem_out;
             `JAL, `JALR: wb_m <= PC_m + 4;
@@ -56,7 +60,7 @@ module mem_stage(
     end 
 
     // DMEM access control 
-    always@(*) begin
+    always @(*) begin
         case(funct3)
             3'b000, 3'b100: access_size <= `BYTE;
             3'b001, 3'b101: access_size <= `HALFWORD;

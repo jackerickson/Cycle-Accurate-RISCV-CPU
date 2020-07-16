@@ -6,16 +6,19 @@ module execute(
     input [31:0] inst_d,
     input [31:0] wb_w_bypass,
     input [31:0] alu_m_bypass,
+    input [1:0] rs1_bypass,
+    input [1:0] rs2_bypass,
 
-    output wire [31:0] PC_x,
-    output wire [31:0] inst_x,
+    output reg [31:0] PC_x,
+    output reg [31:0] inst_x,
     output wire [31:0] alu_x,
     output wire [31:0] rs2_x,
-    output reg PCSel
+    output reg PCSel,
+    output kill_dx
     );
     
-    wire [31:0] rs1;
-    wire [31:0] rs2;
+    reg [31:0] rs1;
+    reg [31:0] rs2;
     
     wire [31:0] ALU_in1;
     wire [31:0] ALU_in2;
@@ -28,6 +31,8 @@ module execute(
     wire ASel, BSel;
     reg [3:0] ALUSel;
     wire BrUn;
+    reg kill_dx;
+    reg kill;
 
     assign opcode = inst_x[6:0];
     assign funct3 = inst_x[14:12];
@@ -38,7 +43,8 @@ module execute(
 
     alu alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel),.alu_res(alu_x));
 
-
+    reg [31:0] interA;
+    reg [31:0] interB;
 
 
     // //register the inputs
@@ -46,16 +52,23 @@ module execute(
         //removed now for testing
         // inst_x <= inst_d
         // PC_x <= PC_d;
+        if(kill_dx) begin
+            // rs1 <= 32'b0;
+            // rs2 <= 32'b0;
+            PC_x <= 32'h0;
+            inst_x <= 32'h13;
+        end
+        else begin
+            // rs1 <= rs1_d;
+            // rs2 <= rs2_d;
+            PC_x <= PC_d;
+            inst_x <= inst_d;
+        end
        
     end
 
-    assign rs1 = rs1_d;
-    assign rs2 = rs2_d;
     assign write_data = rs2_d;
-    assign PC_x = PC_d;
-    assign inst_x = inst_d;
     assign rs2_x = rs2_d;
-
 
     // //control signals
     assign ASel = (opcode == `JAL || opcode == `AUIPC || opcode == `BCC)? 0: 1;
@@ -70,28 +83,31 @@ module execute(
     //These have to become always blocks, bigger muxes that take control logic
     //maybe make fwding ctl provide a seperate signal like bypassSel, which says to either use  
 
+    // need to run alu-in1/2-bypass on the rs1 rs2 regs, since beq needs to exist and beq uses immediate AND rs2 so can't tell BSel to use one or other 
+
     // input A and input B muxes
-    //assign ALU_in1 = ASel ? rs1 : PC_x;
+    assign ALU_in1 = ASel ? rs1 : PC_x;
     assign ALU_in2 = BSel ? rs2 : imm;
 
-    always(*) begin
-        case(ALU_in1_bypass):
-            `MX: ALU_in1 <= alu_m_bypass;
-            `WX: ALU_in1 <= wb_w_bypass;
-            default: begin
-                if (ASel) ALU_in1 <= rs1;
-                else ALU_in1 <= PC_x;
-            end
-        endcase
-        case(ALU_in2_bypass):
-            `MX: ALU_in2 <= alu_m_bypass;
-            `WX: ALU_in2 <= wb_w_bypass;
-            default: begin
-                if (ASel) ALU_in2 <= rs1;
-                else ALU_in2 <= PC_x;
-            end
-        endcase
-                
+    //rs1 and rs2 mux
+    always @(posedge clk) begin
+        if(kill_dx) begin
+            rs1 <= 32'b0;
+            rs2 <= 32'b0;
+        end
+        else begin
+            $display("going through the bypass mux");
+            case(rs1_bypass)
+                `MX: rs1 <= alu_m_bypass;
+                `WX: rs1 <= wb_w_bypass;
+                default: rs1 <= rs1_d;
+            endcase
+            case(rs2_bypass)
+                `MX: rs2 <= alu_m_bypass;
+                `WX: rs2 <= wb_w_bypass;
+                default:  rs2 <= rs2_d;
+            endcase
+        end
 
     end
 
@@ -160,7 +176,25 @@ module execute(
         endcase
     end
 
-
+    //kill bit generation
+    // if kill bit, on conditional/jalr on next insn, kill d and x
+    // if kill bit, on jal just kill decode
+    always @(*) begin
+        case(opcode)
+            `JALR: kill_dx <= 1;
+            `BCC: begin
+                case(funct3) // PCSel: 1 = branch, 0 = don't branch
+                    3'b000: kill_dx <= BrEq;//BEQ
+                    3'b001: kill_dx <= ~BrEq;//BNE
+                    3'b100, 3'b110: kill_dx <= BrLt;//BLT, BLTU 
+                    3'b101, 3'b111: kill_dx <= ~BrLt;//BGE, BGEU
+                    // 3'b110: PCSel <= //BLTU
+                    // 3'b111: PCSel <= //BGEU
+                endcase
+            end
+            default: kill_dx <= 0;
+        endcase
+    end
 
     //Immediate decoding tasks
 
