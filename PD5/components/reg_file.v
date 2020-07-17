@@ -10,7 +10,13 @@ module reg_file(
     );
 
     reg [31:0]user_reg[0:31]; // 2^5, 32b registers in the regfile
- 
+    wire [31:0] reg30;
+    wire [31:0] reg29;
+    wire [31:0] reg1;
+
+    assign reg30 = user_reg[30];
+    assign reg29 = user_reg[29];
+    assign reg1 = user_reg[1];
     wire [31:0] out [0:31];
     // //setup var
     integer i;

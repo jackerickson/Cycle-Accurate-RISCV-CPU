@@ -32,9 +32,9 @@ module dut;
     end
 
     // simulation end conditions
-
+    reg [16:0] counter = 0;
     always@(posedge clk) begin
-
+        counter <= counter + 1;
         if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.execute.opcode == `JALR) begin 
             $display("Returning to SP at end of memory, terminating simulation.");
             
@@ -51,6 +51,9 @@ module dut;
                 #10 $finish;
             end
         end
+
+        // if(inst_x == 32'h010004e4) #5 $finish;
+        // if (counter == 100 ) $finish;
     end
 
 
@@ -60,7 +63,7 @@ module dut;
     wire WM_bypass;
 
     //Hazard ctl
-    wire stall;
+    reg stall = 0;
     wire [31:0] hazard_mux_out;
 
     //fetch stage internals
@@ -99,8 +102,9 @@ module dut;
         // for debugging
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
         //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b,inst_x[11:7]=x%0d, inst_x[19:15]=x%0d, inst_x[24:20]=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7,inst_x[11:7], inst_x[19:15], inst_x[24:20],dut.execute.imm);
-    
+        
         $write("%x:  \t%8x    \t", PC_x, inst_x);
+        
         case(dut.execute.opcode) //output the instruction contents to the console in simulation
             `LUI: begin
             // 7'b0110111: begin
@@ -208,28 +212,66 @@ module dut;
             default: begin $display(" error"); end
 
         endcase
+        $display("Value at reg[30] = %0d", dut.reg_file.user_reg[30]);
 
         $write("\n--------------------------------------\n"); 
     
 
     end 
+    `define RS1 19:5
+    `define RD 11:7
 
-    assign WM_bypass = (inst_m[11:7]==inst_w[11:7]) ? 1:0;
-    assign stall = ((inst_x[6:0] == `LCC) && ((inst_d[19:5] == inst_x[11:7]) || (inst_d[6:0] != `SCC)))? 1: 0;
+    // assign WM_bypass = (inst_m[11:7]==inst_w[11:7]) ? 1:0;
+    // assign stall = ((inst_x[6:0] == `LCC) && 
+    //                     ((inst_d[19:5] == inst_x[11:7]) || (inst_d[6:0] != `SCC))
+    // ) ||
+    
+    wire [5:0] w_rd1;
+    assign w_rd1 = inst_w[11:7];
+    wire [5:0] d_rs1;
+    wire [5:0] d_rs2;
+    assign d_rs1 = inst_d[19:15];
+    assign d_rs2 = inst_d[24:20];
+
+    // assign stall = ((inst_d[19:15] == inst_w[11:7] || inst_d[24:20] == inst_w[11:7]) && inst_w[11:7] != 5'b0);
+
+    always @(*) begin
+        
+       if (
+        //    || inst_m[5:0] ==  `RCC 
+           ((inst_d[5:0] == `BCC || inst_d[5:0] == `SCC|| inst_m[5:0] ==  `RCC) && 
+           ((inst_d[19:15] == inst_w[11:7] || inst_d[24:20] == inst_w[11:7]) && inst_w[11:7] != 5'b0)) || 
+            
+           ((inst_m[5:0] == `BCC || inst_m[5:0] == `SCC || inst_m[5:0] ==  `RCC) && 
+           ((inst_d[19:15] == inst_m[11:7] || inst_d[24:20] == inst_m[11:7]) && inst_m[11:7] != 5'b0))
+           
+
+        //    || 
+
+        //    ((inst_d[19:15] == inst_m[11:7] || inst_d[24:20] == inst_m[11:7]) && inst_m[11:7] != 5'b0)
+            ) 
+            stall = 1; // thisis for situations like add.d lines 08 to 14, decode needs results to enter into the comparator
+        // || inst_d[19:15] == inst_w[24:20] 
+        else stall = 0;
+
+    
+    end
+
     assign hazard_mux_out = (stall)? 32'h13 : inst_d;
 
     always @(*) begin
-        if (inst_x[19:15] == inst_m[11:7]) rs1_bypass <= `MX;
-        else if (inst_x[19:15] == inst_w[11:7]) rs1_bypass <= `WX;
+        if (inst_x[19:15] == inst_m[11:7] && inst_w[11:7] != 5'b0) rs1_bypass <= `MX;
+        else if (inst_x[19:15] == inst_w[11:7] && inst_w[11:7] != 5'b0) rs1_bypass <= `WX;
         else rs1_bypass <= `NONE;
 
-        if (inst_x[24:20] == inst_m[11:7]) rs2_bypass <= `MX;
-        else if (inst_x[24:20] == inst_w[11:7]) rs2_bypass <= `WX;
+        if (inst_x[24:20] == inst_m[11:7] && inst_w[11:7] != 5'b0) rs2_bypass <= `MX;
+        else if (inst_x[24:20] == inst_w[11:7] && inst_w[11:7] != 5'b0) rs2_bypass <= `WX;
         else rs2_bypass <= `NONE;
 
     end
 
-    PCMux       PCMux(.clk(clk), .PCSel(PCSel), .alu_x(alu_x), .PC_f(PC_f));
+
+    PCMux       PCMux(.clk(clk), .PCSel(PCSel), .stall(stall), .alu_x(alu_x), .PC_f(PC_f));
 
     memory #(.LOAD_INSTRUCTION_MEM(1)) i_mem (.clk(clk), .address(PC_f), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(inst_f));
        
@@ -240,6 +282,7 @@ module dut;
             .clk(clk),
             .inst_f(inst_f),
             .PC_f(PC_f),
+            .stall(stall),
             .kill_dx(kill_dx),
             //outputs
 
@@ -330,11 +373,22 @@ module PCMux(clk, PCSel, stall, alu_x, PC_f);
         //         PC_f <= PC_f + 4;
         // end
         // else PC_f <= PC_f;
-        if(PCSel)
+
+        if(!stall) begin 
+            if(PCSel)
                 PC_f <= alu_x;
             else 
                 //if we do this we need to nop out the fetch and decode stage
                 PC_f <= PC_f + 4;
+        end
+        // else PC_f <= PC_f;
+        // if(!stall) begin
+        //     if(PCSel)
+        //         PC_f <= alu_x;
+        //     else 
+        //         //if we do this we need to nop out the fetch and decode stage
+        //         PC_f <= PC_f + 4;
+        // end
     end
 endmodule
 

@@ -19,29 +19,51 @@ module fetch_decode(
     reg [31:0] PC_d;
     reg [31:0] inst_d;
 
+    wire [31:0] inst_d_out; 
+
     wire opcode;
     wire kill_d;
+
+    assign inst_d_out = stall?32'h13:inst_d;
 
     assign opcode = PC_d[6:0];
     assign kill_d = (opcode == `JAL);
 
     //change to posedge clk for pipelined
     always@(posedge clk) begin
-        // if(stall) begin
-        //     inst_d <= inst_d;
-        //     PC_d <= PC_d;
-        // end
-        // else begin
-        //     PC_d <= PC_f;
-        //     inst_d <= inst_f;
-        // end
-        if(kill_dx) begin
-            PC_d <= 32'b0;
-            inst_d <= 32'h13;
+
+        // case(stall)
+        //     1: begin begin 
+        //         inst_d <= inst_d;
+        //         PC_d <= PC_d;
+        //     end
+        //     end
+        //     default:begin 
+        //         if(kill_dx) begin
+        //             PC_d <= 32'b0;
+        //             inst_d <= 32'h13;
+        //         end
+        //         else begin
+        //             PC_d <= PC_f;
+        //             inst_d <= inst_f;
+        //         end
+        //     end 
+        // endcase
+
+
+        if(!stall) begin
+            if(kill_dx) begin
+                PC_d <= 32'b0;
+                inst_d <= 32'h13;
+            end
+            else begin
+                PC_d <= PC_f;
+                inst_d <= inst_f;
+            end
         end
-        else begin
-            PC_d <= PC_f;
-            inst_d <= inst_f;
+        else begin 
+            inst_d <= inst_d;
+            PC_d <= PC_d;
         end
     end
 

@@ -15,10 +15,10 @@ Disassembly of section .text.init:
 01000018 <test_3>:
  1000018:	00100093          	addi	x1,x0,1
  100001c:	00100113          	addi	x2,x0,1
- 1000020:	00208f33          	add	x30,x1,x2
- 1000024:	00200e93          	addi	x29,x0,2
- 1000028:	00300193          	addi	x3,x0,3
- 100002c:	4bdf1a63          	bne	x30,x29,10004e0 <fail>
+ 1000020:	00208f33          	add	x30,x1,x2               XMW
+ 1000024:	00200e93          	addi	x29,x0,2            DXMW
+ 1000028:	00300193          	addi	x3,x0,3             FDXMW
+ 100002c:	4bdf1a63          	bne	x30,x29,10004e0 <fail>   FD
 
 01000030 <test_4>:
  1000030:	00300093          	addi	x1,x0,3

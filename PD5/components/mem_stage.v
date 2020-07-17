@@ -53,18 +53,18 @@ module mem_stage(
     //WBMux
     always @(*) begin
         case(inst_x[6:0])
-            `LCC:  wb_m <= d_mem_out;
-            `JAL, `JALR: wb_m <= PC_m + 4;
-            default: wb_m <= alu_m;
+            `LCC:  wb_m = d_mem_out;
+            `JAL, `JALR: wb_m = PC_m + 4;
+            default: wb_m = alu_m;
         endcase
     end 
 
     // DMEM access control 
     always @(*) begin
         case(funct3)
-            3'b000, 3'b100: access_size <= `BYTE;
-            3'b001, 3'b101: access_size <= `HALFWORD;
-            default: access_size <= `WORD;
+            3'b000, 3'b100: access_size = `BYTE;
+            3'b001, 3'b101: access_size = `HALFWORD;
+            default: access_size = `WORD;
         endcase
     end
 

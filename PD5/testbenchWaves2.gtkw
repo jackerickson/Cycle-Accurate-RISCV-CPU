@@ -1,21 +1,21 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Thu Jul 16 04:56:30 2020
+[*] Fri Jul 17 01:02:12 2020
 [*]
 [dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
-[dumpfile_mtime] "Thu Jul 16 04:54:38 2020"
-[dumpfile_size] 13156352
+[dumpfile_mtime] "Fri Jul 17 01:01:36 2020"
+[dumpfile_size] 24141824
 [savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves2.gtkw"
-[timestart] 90
+[timestart] 0
 [size] 1920 1017
 [pos] -1 -1
-*-4.168257 146 305 245 785 45 35 25 15 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.168257 11 305 245 785 45 35 25 15 85 145 465 595 505 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dut.
 [treeopen] dut.execute.
 [sst_width] 197
-[signals_width] 227
+[signals_width] 239
 [sst_expanded] 1
-[sst_vpaned_height] 299
+[sst_vpaned_height] 300
 @28
 dut.clk
 @200
@@ -30,43 +30,173 @@ dut.PCMux.PCSel
 @22
 dut.PC_d[31:0]
 dut.inst_d[31:0]
+@28
+dut.stall
+@24
+dut.w_rd1[5:0]
+dut.d_rs1[5:0]
+dut.d_rs2[5:0]
 @200
 -
 -Execute
 @22
+[color] 2
 dut.PC_x[31:0]
+@c00022
+[color] 2
 dut.inst_x[31:0]
-dut.execute.rs1[31:0]
-dut.execute.rs2[31:0]
-dut.execute.ALU_in1[31:0]
-dut.execute.ALU_in2[31:0]
 @28
-dut.execute.ALU_in1_bypass[1:0]
-dut.execute.ALU_in2_bypass[1:0]
+[color] 2
+(0)dut.inst_x[31:0]
+[color] 2
+(1)dut.inst_x[31:0]
+[color] 2
+(2)dut.inst_x[31:0]
+[color] 2
+(3)dut.inst_x[31:0]
+[color] 2
+(4)dut.inst_x[31:0]
+[color] 2
+(5)dut.inst_x[31:0]
+[color] 2
+(6)dut.inst_x[31:0]
+[color] 2
+(7)dut.inst_x[31:0]
+[color] 2
+(8)dut.inst_x[31:0]
+[color] 2
+(9)dut.inst_x[31:0]
+[color] 2
+(10)dut.inst_x[31:0]
+[color] 2
+(11)dut.inst_x[31:0]
+[color] 2
+(12)dut.inst_x[31:0]
+[color] 2
+(13)dut.inst_x[31:0]
+[color] 2
+(14)dut.inst_x[31:0]
+[color] 2
+(15)dut.inst_x[31:0]
+[color] 2
+(16)dut.inst_x[31:0]
+[color] 2
+(17)dut.inst_x[31:0]
+[color] 2
+(18)dut.inst_x[31:0]
+[color] 2
+(19)dut.inst_x[31:0]
+[color] 2
+(20)dut.inst_x[31:0]
+[color] 2
+(21)dut.inst_x[31:0]
+[color] 2
+(22)dut.inst_x[31:0]
+[color] 2
+(23)dut.inst_x[31:0]
+[color] 2
+(24)dut.inst_x[31:0]
+[color] 2
+(25)dut.inst_x[31:0]
+[color] 2
+(26)dut.inst_x[31:0]
+[color] 2
+(27)dut.inst_x[31:0]
+[color] 2
+(28)dut.inst_x[31:0]
+[color] 2
+(29)dut.inst_x[31:0]
+[color] 2
+(30)dut.inst_x[31:0]
+[color] 2
+(31)dut.inst_x[31:0]
+@1401200
+-group_end
+@22
+dut.execute.ALU_in1[31:0]
+@28
+dut.execute.ASel
+@22
+dut.execute.ALU_in2[31:0]
+dut.execute.alu_x[31:0]
+@24
+dut.execute.rs1_bypass[1:0]
+[color] 1
+dut.execute.rs2_bypass[1:0]
+@22
+dut.execute.alu_m_bypass[31:0]
+dut.execute.wb_w_bypass[31:0]
 @420
 dut.execute.imm[31:0]
 @22
 dut.execute.imm[31:0]
+dut.execute.rs1[31:0]
+dut.execute.rs2[31:0]
 @28
 dut.execute.BrLt
 dut.execute.BrEq
 dut.execute.BrUn
-@29
 dut.execute.kill_dx
 @200
 -
 -Memory
 @22
 dut.mem_stage.PC_m[31:0]
+@c00022
 dut.inst_m[31:0]
+@28
+(0)dut.inst_m[31:0]
+(1)dut.inst_m[31:0]
+(2)dut.inst_m[31:0]
+(3)dut.inst_m[31:0]
+(4)dut.inst_m[31:0]
+(5)dut.inst_m[31:0]
+(6)dut.inst_m[31:0]
+(7)dut.inst_m[31:0]
+(8)dut.inst_m[31:0]
+(9)dut.inst_m[31:0]
+(10)dut.inst_m[31:0]
+(11)dut.inst_m[31:0]
+(12)dut.inst_m[31:0]
+(13)dut.inst_m[31:0]
+(14)dut.inst_m[31:0]
+(15)dut.inst_m[31:0]
+(16)dut.inst_m[31:0]
+(17)dut.inst_m[31:0]
+(18)dut.inst_m[31:0]
+(19)dut.inst_m[31:0]
+(20)dut.inst_m[31:0]
+(21)dut.inst_m[31:0]
+(22)dut.inst_m[31:0]
+(23)dut.inst_m[31:0]
+(24)dut.inst_m[31:0]
+(25)dut.inst_m[31:0]
+(26)dut.inst_m[31:0]
+(27)dut.inst_m[31:0]
+(28)dut.inst_m[31:0]
+(29)dut.inst_m[31:0]
+(30)dut.inst_m[31:0]
+(31)dut.inst_m[31:0]
+@1401200
+-group_end
 @200
 -Writeback
 @22
 dut.inst_w[31:0]
 @28
 dut.WB.RegWE
-@22
+@24
 dut.WB.addr_rd[4:0]
+@22
 dut.WB.wb_w[31:0]
+@23
+dut.reg_file.reg30[31:0]
+@24
+dut.reg_file.addr_rs1[4:0]
+@22
+dut.reg_file.data_rs1[31:0]
+dut.reg_file.data_rs1[31:0]
+@24
+dut.reg_file.addr_rs1[4:0]
 [pattern_trace] 1
 [pattern_trace] 0

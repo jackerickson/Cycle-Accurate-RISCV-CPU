@@ -1,3 +1,5 @@
+`include "components/constants.v"
+
 module execute(
     input clk,
     input [31:0] PC_d,
@@ -12,7 +14,7 @@ module execute(
     output reg [31:0] PC_x,
     output reg [31:0] inst_x,
     output wire [31:0] alu_x,
-    output wire [31:0] rs2_x,
+    output reg [31:0] rs2_x,
     output reg PCSel,
     output kill_dx
     );
@@ -20,8 +22,8 @@ module execute(
     reg [31:0] rs1;
     reg [31:0] rs2;
     
-    wire [31:0] ALU_in1;
-    wire [31:0] ALU_in2;
+    reg [31:0] ALU_in1;
+    reg [31:0] ALU_in2;
 
     reg [31:0]imm; //need to generate immediate
     wire [6:0] opcode;
@@ -43,8 +45,9 @@ module execute(
 
     alu alu1(.rs1(ALU_in1), .rs2(ALU_in2), .ALUsel(ALUSel),.alu_res(alu_x));
 
-    reg [31:0] interA;
-    reg [31:0] interB;
+    // reg [31:0] interA;
+    // reg [31:0] interB;
+    reg [31:0] rs1_x;
 
 
     // //register the inputs
@@ -53,14 +56,14 @@ module execute(
         // inst_x <= inst_d
         // PC_x <= PC_d;
         if(kill_dx) begin
-            // rs1 <= 32'b0;
-            // rs2 <= 32'b0;
+            rs1 <= 32'b0;
+            rs1 <= 32'b0;
             PC_x <= 32'h0;
             inst_x <= 32'h13;
         end
         else begin
-            // rs1 <= rs1_d;
-            // rs2 <= rs2_d;
+            rs1 <= rs1_d;
+            rs2 <= rs2_d;
             PC_x <= PC_d;
             inst_x <= inst_d;
         end
@@ -68,7 +71,7 @@ module execute(
     end
 
     assign write_data = rs2_d;
-    assign rs2_x = rs2_d;
+    // assign rs2_x = rs2_d;
 
     // //control signals
     assign ASel = (opcode == `JAL || opcode == `AUIPC || opcode == `BCC)? 0: 1;
@@ -86,28 +89,50 @@ module execute(
     // need to run alu-in1/2-bypass on the rs1 rs2 regs, since beq needs to exist and beq uses immediate AND rs2 so can't tell BSel to use one or other 
 
     // input A and input B muxes
-    assign ALU_in1 = ASel ? rs1 : PC_x;
-    assign ALU_in2 = BSel ? rs2 : imm;
+    // I can merge the ASel logic into this since it's not coming from outside anymore
+    // assign ALU_in1 = ASel ? rs1 : PC_x;
+    // assign ALU_in2 = BSel ? rs2 : imm;
 
+    reg fault = 0;
+    reg WXBP = 0;
     //rs1 and rs2 mux
-    always @(posedge clk) begin
-        if(kill_dx) begin
-            rs1 <= 32'b0;
-            rs2 <= 32'b0;
-        end
-        else begin
-            $display("going through the bypass mux");
+    always @(*) begin
+        
+       
+        // $display("going through the bypass mux: rs1bypass=%b rs2bypass= %b", rs1_bypass, rs2_bypass);
+        //this is to do bypassing into rs1 but I'm gonna stall instead
+        // case(rs1_bypass)
+        //     `MX: begin WXBP = 0; fault = 0; rs1 = alu_m_bypass; end
+        //     `WX:  begin WXBP = 1; fault = 0; rs1 = wb_w_bypass;end
+        //     `NONE:  begin WXBP = 0;fault = 0; rs1 = rs1_x;end
+        //     default: begin WXBP = 0;fault = 1; end
+        // endcase
+        // case(rs2_bypass)
+        //     `MX: rs2 = alu_m_bypass;
+        //     `WX: rs2 = wb_w_bypass;
+        //     `NONE: rs2=rs2_x;
+        //     default:  rs2 = rs2_x;
+        // endcase
+
+        if(ASel) begin
             case(rs1_bypass)
-                `MX: rs1 <= alu_m_bypass;
-                `WX: rs1 <= wb_w_bypass;
-                default: rs1 <= rs1_d;
-            endcase
-            case(rs2_bypass)
-                `MX: rs2 <= alu_m_bypass;
-                `WX: rs2 <= wb_w_bypass;
-                default:  rs2 <= rs2_d;
+                `MX: ALU_in1 = alu_m_bypass;
+                `WX:  ALU_in1 = wb_w_bypass;
+                `NONE: ALU_in1 = rs1;
+                default: ALU_in1 = rs1;
             endcase
         end
+        else ALU_in1 = PC_x;
+
+        if(BSel) begin
+            case(rs2_bypass)
+                `MX: ALU_in2 = alu_m_bypass;
+                `WX: ALU_in2 = wb_w_bypass;
+                `NONE: ALU_in2=rs2;
+                default:  ALU_in2 = rs2;
+            endcase
+        end
+        else ALU_in2 = imm;
 
     end
 
