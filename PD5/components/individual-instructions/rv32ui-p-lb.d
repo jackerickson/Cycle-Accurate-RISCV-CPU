@@ -94,7 +94,7 @@ Disassembly of section .text.init:
  1000108:	00108f03          	lb	x30,1(x1)
  100010c:	000f0313          	addi	x6,x30,0
  1000110:	ff000e93          	addi	x29,x0,-16
- 1000114:	13d31c63          	bne	x6,x29,100024c <fail>
+ 1000114:	13d31c63          	bne	x6,x29,100024c <fail>  rs1 = 6 rs2 = 29
  1000118:	00120213          	addi	x4,x4,1 # 1 <_start-0xffffff>
  100011c:	00200293          	addi	x5,x0,2
  1000120:	fe5210e3          	bne	x4,x5,1000100 <test_12+0x8>

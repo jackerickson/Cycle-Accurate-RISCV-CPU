@@ -1,19 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Fri Jul 17 01:02:12 2020
+[*] Sat Jul 18 02:14:38 2020
 [*]
 [dumpfile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbench.vcd"
-[dumpfile_mtime] "Fri Jul 17 01:01:36 2020"
-[dumpfile_size] 24141824
+[dumpfile_mtime] "Sat Jul 18 02:14:33 2020"
+[dumpfile_size] 269979
 [savefile] "\\wsl$\Ubuntu\home\jack\Cycle-Accurate-RISCV-CPU\PD5\testbenchWaves2.gtkw"
-[timestart] 0
+[timestart] 3300
 [size] 1920 1017
 [pos] -1 -1
-*-4.168257 11 305 245 785 45 35 25 15 85 145 465 595 505 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.168257 3329 705 835 85 2955 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dut.
 [treeopen] dut.execute.
+[treeopen] dut.mem_stage.
 [sst_width] 197
-[signals_width] 239
+[signals_width] 246
 [sst_expanded] 1
 [sst_vpaned_height] 300
 @28
@@ -23,21 +24,24 @@ dut.clk
 @22
 dut.PCMux.PC_f[31:0]
 dut.inst_f[31:0]
-@28
-dut.PCMux.PCSel
 @200
 -Decode
 @22
 dut.PC_d[31:0]
 dut.inst_d[31:0]
+@24
+dut.m_rd[4:0]
+dut.w_rd1[4:0]
+dut.d_rs1[4:0]
+dut.d_rs2[4:0]
 @28
 dut.stall
-@24
-dut.w_rd1[5:0]
-dut.d_rs1[5:0]
-dut.d_rs2[5:0]
 @200
 -
+@22
+dut.execute.rs1_d[31:0]
+dut.execute.rs2_d[31:0]
+@200
 -Execute
 @22
 [color] 2
@@ -112,12 +116,12 @@ dut.inst_x[31:0]
 (31)dut.inst_x[31:0]
 @1401200
 -group_end
-@22
-dut.execute.ALU_in1[31:0]
 @28
 dut.execute.ASel
 @22
+dut.execute.ALU_in1[31:0]
 dut.execute.ALU_in2[31:0]
+@23
 dut.execute.alu_x[31:0]
 @24
 dut.execute.rs1_bypass[1:0]
@@ -130,6 +134,11 @@ dut.execute.wb_w_bypass[31:0]
 dut.execute.imm[31:0]
 @22
 dut.execute.imm[31:0]
+[color] 3
+dut.execute.rs1[31:0]
+[color] 3
+dut.execute.rs2[31:0]
+@420
 dut.execute.rs1[31:0]
 dut.execute.rs2[31:0]
 @28
@@ -139,6 +148,9 @@ dut.execute.BrUn
 dut.execute.kill_dx
 @200
 -
+@22
+dut.reg_file.reg4[31:0]
+@200
 -Memory
 @22
 dut.mem_stage.PC_m[31:0]
@@ -179,6 +191,21 @@ dut.inst_m[31:0]
 (31)dut.inst_m[31:0]
 @1401200
 -group_end
+@28
+dut.mem_stage.WM_bypass
+dut.mem_stage.d_mem.w_enable
+@22
+dut.mem_stage.wb_w_bypass[31:0]
+dut.mem_stage.rs2_x[31:0]
+dut.mem_stage.alu_m[31:0]
+dut.mem_stage.wb_m[31:0]
+dut.mem_stage.DataW[31:0]
+@28
+dut.mem_stage.d_mem.access_size[1:0]
+@22
+dut.mem_stage.d_mem_out[31:0]
+@28
+dut.mem_stage.opcode[6:0]
 @200
 -Writeback
 @22
@@ -189,7 +216,9 @@ dut.WB.RegWE
 dut.WB.addr_rd[4:0]
 @22
 dut.WB.wb_w[31:0]
-@23
+dut.reg_file.reg1[31:0]
+dut.reg_file.reg10[31:0]
+dut.reg_file.reg29[31:0]
 dut.reg_file.reg30[31:0]
 @24
 dut.reg_file.addr_rs1[4:0]

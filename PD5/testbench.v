@@ -32,18 +32,18 @@ module dut;
     end
 
     // simulation end conditions
-    reg [16:0] counter = 0;
+    reg [32:0] counter = 0;
     always@(posedge clk) begin
         counter <= counter + 1;
-        if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.execute.opcode == `JALR) begin 
-            $display("Returning to SP at end of memory, terminating simulation.");
+        // if(dut.reg_file.user_reg[2] == 32'h0101_1111 && dut.execute.opcode == `JALR) begin 
+        //     $display("Returning to SP at end of memory, terminating simulation.");
             
-        //     // // $display("Contents of regfile: ");
-        //     // for (i=0;i<32;i++) begin
-        //     //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
-        //     // end
-            $finish;
-        end
+        // //     // // $display("Contents of regfile: ");
+        // //     // for (i=0;i<32;i++) begin
+        // //     //     $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
+        // //     // end
+        //     $finish;
+        // end
         if(inst_x == 32'd0) #5 $finish;
         if(inst_x == 32'hbadbadff)begin 
             if(PC_x != 32'h01000000 - 4) begin
@@ -53,7 +53,7 @@ module dut;
         end
 
         // if(inst_x == 32'h010004e4) #5 $finish;
-        // if (counter == 100 ) $finish;
+        // if (counter == 1000 ) $finish;
     end
 
 
@@ -205,7 +205,7 @@ module dut;
             end
             `CCC: begin
                 //$write("Detected a CCC opcode\n");
-                if(inst_x[31:7] == 25'd0) begin $display("ECALL  "); #5 $finish; end
+                if(inst_x[31:7] == 25'd0) begin $display("ECALL  \n Clock cycles to complete: %d", counter); #5 $finish; end
                 else $display("Looks an ECALL but doesn't match what I expected: %b", inst_x);
 
             end
@@ -218,40 +218,79 @@ module dut;
     
 
     end 
+
+    // task decode_jType;
+    //     begin
+    //         imm[31:21] <= {11{inst_x[31]}};
+    //         imm[19:12] <= inst_x[19:12];
+    //         imm[11] <= inst_x[20];
+    //         imm[10:1] <= inst_x[30:21];
+    //         imm[20] <= inst_x[31];
+    //     end
+    // endtask
+    `define OP 6:0
     `define RS1 19:5
+    `define RS2 24:20
     `define RD 11:7
 
-    // assign WM_bypass = (inst_m[11:7]==inst_w[11:7]) ? 1:0;
+    assign WM_bypass = (inst_m[24:20]==inst_w[11:7]) ? 1:0;
     // assign stall = ((inst_x[6:0] == `LCC) && 
     //                     ((inst_d[19:5] == inst_x[11:7]) || (inst_d[6:0] != `SCC))
     // ) ||
     
-    wire [5:0] w_rd1;
+    wire [4:0] w_rd1;
     assign w_rd1 = inst_w[11:7];
-    wire [5:0] d_rs1;
-    wire [5:0] d_rs2;
+    wire [4:0] m_rd;
+    assign m_rd = inst_m[11:7];
+
+
+    wire [4:0] d_rs1;
+    wire [4:0] d_rs2;
     assign d_rs1 = inst_d[19:15];
     assign d_rs2 = inst_d[24:20];
+
+    wire [6:0] inst_d_opcode = inst_d[6:0];
+    wire [6:0] inst_x_opcode = inst_x[6:0];
+    wire [6:0] inst_m_opcode = inst_m[6:0];
+
+    wire [4:0] inst_d_addr_rs1 = inst_d[19:15]
+
 
     // assign stall = ((inst_d[19:15] == inst_w[11:7] || inst_d[24:20] == inst_w[11:7]) && inst_w[11:7] != 5'b0);
 
     always @(*) begin
-        
+        //I don't have bypass into the Branch comparator so need to stall decode in all branches where either rs1 or rs2 is still in the pipeline.
        if (
-        //    || inst_m[5:0] ==  `RCC 
-           ((inst_d[5:0] == `BCC || inst_d[5:0] == `SCC|| inst_m[5:0] ==  `RCC) && 
+           //stall if WB has value
+           ((inst_d_opcode != `LUI && inst_d[6:0] != `AUIPC && inst_d[6:0] != `JAL) && 
            ((inst_d[19:15] == inst_w[11:7] || inst_d[24:20] == inst_w[11:7]) && inst_w[11:7] != 5'b0)) || 
             
-           ((inst_m[5:0] == `BCC || inst_m[5:0] == `SCC || inst_m[5:0] ==  `RCC) && 
-           ((inst_d[19:15] == inst_m[11:7] || inst_d[24:20] == inst_m[11:7]) && inst_m[11:7] != 5'b0))
-           
-
-        //    || 
-
-        //    ((inst_d[19:15] == inst_m[11:7] || inst_d[24:20] == inst_m[11:7]) && inst_m[11:7] != 5'b0)
+            // stall if memory has value
+           ((inst_d[6:0] == `BCC || inst_d[6:0] == `SCC) && 
+           ((inst_d[19:15] == inst_m[11:7] || inst_d[24:20] == inst_m[11:7]) && inst_m[11:7] != 5'b0)) || 
+            
+            // stall if execute has value (maybe I can make these only for BCCs since they're the ones that can't get bypass input, but also r2 can't get from bypass on a store)
+           (
+               (inst_d[6:0] == `BCC || inst_x[6:0] == `LCC ||  inst_d[6:0] == `SCC) && 
+                (
+                    (
+                    inst_d[19:15] == inst_x[11:7] || 
+                    inst_d[24:20] == inst_x[11:7]
+                    ) && inst_x[11:7] != 5'b0)
             ) 
-            stall = 1; // thisis for situations like add.d lines 08 to 14, decode needs results to enter into the comparator
-        // || inst_d[19:15] == inst_w[24:20] 
+
+
+        //    ((inst_d[6:0] != `LUI && inst_d[6:0] != `AUIPC && inst_d[6:0] !=  `JALR  && inst_d[6:0] != `LCC && inst_d[6:0] != `SCC) && 
+        //    ((inst_d[19:15] == inst_x[11:7] || inst_d[24:20] == inst_x[11:7]) && inst_x[11:7] != 5'b0)) 
+           
+           //Load use
+        // ||   (inst_x[6:0] == `LCC && ( inst_d[19:15] == inst_x[11:7]) || (inst_d[6:0] != `SCC) && inst_x[11:7] != 5'b0)
+
+            ) 
+            stall = 1; 
+            
+            // thisis for situations like add.d lines 08 to 14, decode needs results to enter into the comparator
+        // || inst_d[19:15] == inst_w[24:20WM_bypass] 
         else stall = 0;
 
     
@@ -260,16 +299,19 @@ module dut;
     assign hazard_mux_out = (stall)? 32'h13 : inst_d;
 
     always @(*) begin
-        if (inst_x[19:15] == inst_m[11:7] && inst_w[11:7] != 5'b0) rs1_bypass <= `MX;
-        else if (inst_x[19:15] == inst_w[11:7] && inst_w[11:7] != 5'b0) rs1_bypass <= `WX;
+        if (inst_x[19:15] == inst_m[11:7] && inst_m[11:7] != 5'b0 && inst_m[6:0]!=`BCC && inst_m[6:0] != `LCC && inst_m[6:0] != `SCC) rs1_bypass <= `MX;
+        else if (inst_x[19:15] == inst_w[11:7] && (inst_w[11:7] != 5'b0) && (inst_w[6:0] != `SCC) && (inst_w[6:0]!=`BCC) ) rs1_bypass <= `WX;
+        //                                                                  | added this stuff because if the wb insn ins't writing back then we don't need to bypass | 
         else rs1_bypass <= `NONE;
 
-        if (inst_x[24:20] == inst_m[11:7] && inst_w[11:7] != 5'b0) rs2_bypass <= `MX;
+        if (inst_x[24:20] == inst_m[11:7] && inst_m[11:7] != 5'b0  && inst_m[6:0] != `SCC) rs2_bypass <= `MX;
         else if (inst_x[24:20] == inst_w[11:7] && inst_w[11:7] != 5'b0) rs2_bypass <= `WX;
         else rs2_bypass <= `NONE;
 
     end
+    // 10 0001 1101 11110001001001100011
 
+    // 000000000001 0010 0000  00100 001 0011
 
     PCMux       PCMux(.clk(clk), .PCSel(PCSel), .stall(stall), .alu_x(alu_x), .PC_f(PC_f));
 
@@ -316,7 +358,7 @@ module dut;
         .PC_x(PC_x),
         .inst_x(inst_x),
         .alu_x(alu_x),
-        .rs2_x(rs2_x),
+        .rs2(rs2_x),
         .PCSel(PCSel),
         .kill_dx(kill_dx)
     );

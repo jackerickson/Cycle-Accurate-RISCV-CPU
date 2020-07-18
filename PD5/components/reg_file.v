@@ -13,10 +13,14 @@ module reg_file(
     wire [31:0] reg30;
     wire [31:0] reg29;
     wire [31:0] reg1;
+    wire [31:0] reg4;
+    wire [31:0] reg10;
 
     assign reg30 = user_reg[30];
     assign reg29 = user_reg[29];
     assign reg1 = user_reg[1];
+    assign reg4 = user_reg[4];
+    assign reg10 = user_reg[10];
     wire [31:0] out [0:31];
     // //setup var
     integer i;

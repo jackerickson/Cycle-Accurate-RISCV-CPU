@@ -14,13 +14,13 @@ module execute(
     output reg [31:0] PC_x,
     output reg [31:0] inst_x,
     output wire [31:0] alu_x,
-    output reg [31:0] rs2_x,
+    output reg [31:0] rs2,
     output reg PCSel,
     output kill_dx
     );
     
     reg [31:0] rs1;
-    reg [31:0] rs2;
+    // reg [31:0] rs2;
     
     reg [31:0] ALU_in1;
     reg [31:0] ALU_in2;
@@ -57,7 +57,7 @@ module execute(
         // PC_x <= PC_d;
         if(kill_dx) begin
             rs1 <= 32'b0;
-            rs1 <= 32'b0;
+            rs2 <= 32'b0;
             PC_x <= 32'h0;
             inst_x <= 32'h13;
         end
@@ -71,7 +71,6 @@ module execute(
     end
 
     assign write_data = rs2_d;
-    // assign rs2_x = rs2_d;
 
     // //control signals
     assign ASel = (opcode == `JAL || opcode == `AUIPC || opcode == `BCC)? 0: 1;
@@ -206,7 +205,7 @@ module execute(
     // if kill bit, on jal just kill decode
     always @(*) begin
         case(opcode)
-            `JALR: kill_dx <= 1;
+            `JAL, `JALR: kill_dx <= 1;
             `BCC: begin
                 case(funct3) // PCSel: 1 = branch, 0 = don't branch
                     3'b000: kill_dx <= BrEq;//BEQ

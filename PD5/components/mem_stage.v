@@ -34,6 +34,7 @@ module mem_stage(
 
     //DataW mux
     assign DataW = (WM_bypass)? wb_w_bypass: rs2_m; 
+ 
 
     //RdUn check if funct3 is one of the unsigned loads
     assign RdUn = (funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
@@ -52,7 +53,7 @@ module mem_stage(
     //might want to put RegRW control here then pass it on too...
     //WBMux
     always @(*) begin
-        case(inst_x[6:0])
+        case(inst_m[6:0])
             `LCC:  wb_m = d_mem_out;
             `JAL, `JALR: wb_m = PC_m + 4;
             default: wb_m = alu_m;
