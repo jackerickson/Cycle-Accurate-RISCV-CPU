@@ -11,16 +11,8 @@ module mem_stage(
     output reg [31:0] wb_m,
     output [31:0] alu_m
 );
-
-
-    
-    wire WEn;
-    wire [2:0]funct3;
-    wire [6:0] opcode;
-    wire RdUn;
     wire [31:0] d_mem_out;
 
-    wire [31:0] DataW;
     reg [1:0] access_size;
     reg [31:0]alu_m;
     reg [31:0]rs2_m;
@@ -28,21 +20,28 @@ module mem_stage(
     
     reg [31:0] inst_m;
 
-    assign opcode = inst_m[6:0];
-    assign funct3 = inst_m[14:12];
-    assign funct7 = inst_m[31:25];
-
-    //DataW mux
-    assign DataW = (WM_bypass)? wb_w_bypass: rs2_m; 
+    wire [6:0] opcode = inst_m[6:0];
+    wire [2:0] funct3 = inst_m[14:12];
+   
+    //data_in mux
+    wire [31:0] data_in = (WM_bypass)? wb_w_bypass: rs2_m; 
  
-
     //RdUn check if funct3 is one of the unsigned loads
-    assign RdUn = (funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
+    wire RdUn = (funct3 == 3'b100 || funct3 == 3'b101)? 1: 0;
 
-    assign WEn = (opcode == `SCC)? 1 :0; // if opcode is SX
+    wire WEn = (opcode == `SCC)? 1 :0; // if opcode is SX
     
-    memory      d_mem(.clk(clk), .address(alu_m), .data_in(DataW), .w_enable(WEn), .access_size(access_size), .RdUn(RdUn), .data_out(d_mem_out));
-    //change to posedge clk when piplining
+    memory      d_mem(
+        .clk(clk), 
+        .address(alu_m), 
+        .data_in(data_in), 
+        .w_enable(WEn), 
+        .access_size(access_size), 
+        .RdUn(RdUn), 
+        .data_out(d_mem_out)
+        );
+    
+    // reg captures
     always @(posedge clk) begin
         inst_m <= inst_x;
         rs2_m <= rs2_x;
@@ -50,7 +49,6 @@ module mem_stage(
         PC_m <= PC_x;
     end
 
-    //might want to put RegRW control here then pass it on too...
     //WBMux
     always @(*) begin
         case(inst_m[6:0])

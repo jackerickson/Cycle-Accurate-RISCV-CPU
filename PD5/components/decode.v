@@ -1,4 +1,4 @@
-module fetch_decode(
+module decode(
     input clk,
     input [31:0] inst_f,
     input [31:0] PC_f,
@@ -31,30 +31,14 @@ module fetch_decode(
 
     //change to posedge clk for pipelined
     always@(posedge clk) begin
-
-        // case(stall)
-        //     1: begin begin 
-        //         inst_d <= inst_d;
-        //         PC_d <= PC_d;
-        //     end
-        //     end
-        //     default:begin 
-        //         if(kill_dx) begin
-        //             PC_d <= 32'b0;
-        //             inst_d <= 32'h13;
-        //         end
-        //         else begin
-        //             PC_d <= PC_f;
-        //             inst_d <= inst_f;
-        //         end
-        //     end 
-        // endcase
-
+        
+        // if we're stalling we need to disable WE in the PC_d and inst_d register
 
         if(!stall) begin
+            //also check for kill_dx which will set PC_d to 0 and inst_d to NOP
             if(kill_dx) begin
                 PC_d <= 32'b0;
-                inst_d <= 32'h13;
+                inst_d <= `NOP;
             end
             else begin
                 PC_d <= PC_f;
@@ -65,6 +49,7 @@ module fetch_decode(
             inst_d <= inst_d;
             PC_d <= PC_d;
         end
+
     end
 
 endmodule

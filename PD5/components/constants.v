@@ -12,33 +12,33 @@
 //FOR CCC, only ident ECALL, not other opcodes
 `define CCC     7'b111_0011      // exx, csrxx
 
-
+`define NOP     32'h13
 
 //ALU select codes
-`define ADD 0
-`define AND 1
-`define OR 2
-`define SLL 3
-`define SLT 4
-`define SRA 5
-`define SRL 6
-`define SUB 7
-`define XOR 8
-`define SLTU 9
-`define LUIOP 11
-`define JADD 12
+`define ADD     0
+`define AND     1
+`define OR      2
+`define SLL     3
+`define SLT     4
+`define SRA     5
+`define SRL     6
+`define SUB     7
+`define XOR     8
+`define SLTU    9
+`define LUIOP   11
+`define JADD    12
 
 //ALUinput mux bypass ops
-`define MX 2'd0
-`define WX 2'd1
-`define NONE 2'd2
+`define MX      2'd0
+`define WX      2'd1
+`define NONE    2'd2
 
-//WBSel options
-`define MEM 2'd0
-`define ALU 2'd1
-`define PC_NEXT 2'd2
+// //WBSel options
+// `define MEM     2'd0
+// `define ALU     2'd1
+// `define PC_NEXT 2'd2
 
 //Access size
-`define BYTE 2'd0
+`define BYTE    2'd0
 `define HALFWORD 2'd1
-`define WORD 2'd2
+`define WORD    2'd2
