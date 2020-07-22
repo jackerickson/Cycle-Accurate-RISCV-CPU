@@ -1,66 +1,20 @@
-// `include "components/fetch_decode.v"
+
 `include "components/constants.v"
-// `include "components/memory.v"
-// `include "execute.v"
-// `include "alu.v"
-// `include "reg_file.v"
-
-/*
-Tasks:
-
-    - Correct pipelined executions
-    - Instance of stalls due to Read after write data hazards
-    - Forwarding happening on each of the input and every stage
-    NO BRANCH PREDICTION THANK GOD
-
-    Method to avoid RAW errors - insert nops (stalls until the RAW is cleared)
-        - insert NOPS wherever there is a data dependance that cannot be resolved via forwarding
-
-*/
-
 
 module dut;
 
     reg clk = 0;
 
-    // instruction memory inputs    
 
     initial begin
         $dumpfile("testbench.vcd");
         $dumpvars(0, dut);
 
     end
-    integer i;
+    
     // simulation end conditions
     reg [32:0] counter = 0;
-    always@(posedge clk) begin
-        counter <= counter + 1;
-        if(dut.execute.ALU_in1 == 32'h0101_1111 && dut.execute.opcode == `JALR) begin 
-            $display("Returning to SP at end of memory, terminating simulation.");
-            
-            $display("Contents of regfile: ");
-            for (i=0;i<32;i++) begin
-                $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
-            end
-            $finish;
-        end
-        // if(inst_x == 32'd0) #5 $finish;
-        if(inst_x == 32'hbadbadff)begin 
-            if(PC_x != 32'h01000000 - 4) begin
-                $display("Exiting: Instruction memory returned out of range"); 
-                $display("Contents of regfile: ");
-                for (i=0;i<32;i++) begin
-                    $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
-                end
-                $finish;
-            end
-        end
-
-        // if(inst_x == 32'h010004e4) #5 $finish;
-        // if (counter == 1000 ) $finish;
-    end
-
-
+    
     //Fwding ctl logic signals
     reg [1:0] rs1_bypass;
     reg [1:0] rs2_bypass;
@@ -101,12 +55,14 @@ module dut;
     wire [4:0] addr_rd;
     wire RegWE; 
 
+    integer i;
     //LOGGING 
     always @(posedge clk) begin
         // for debugging
         //opcode determines instruction format, except for MCC types instructions (SLLI, SRLI, and SRAI are different than the other MCC instructions)
         //$write("Current instruction components: opcode=%7b, func3=%3b, func7=%7b,inst_x[11:7]=x%0d, inst_x[19:15]=x%0d, inst_x[24:20]=x%0d, dut.execute.imm=%0d\n", opcode, funct3, funct7,inst_x[11:7], inst_x[19:15], inst_x[24:20],dut.execute.imm);
-        
+        counter <= counter + 1;
+
         $write("%x:  \t%8x    \t", PC_x, inst_x);
         
         case(dut.execute.opcode) //output the instruction contents to the console in simulation
@@ -160,7 +116,10 @@ module dut;
             `MCC: begin
                 case(dut.execute.funct3)
                     //I-Type cases
-                    3'b000: $display("ADDI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    3'b000: begin
+                        if (inst_x[11:7] == 5'd0 && dut.execute.imm == 32'd0  && inst_x[19:15] == 5'd0) $display("NOP");
+                        else $display("ADDI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
+                    end 
                     3'b010: $display("SLTI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
                     3'b011: $display("SLTIU  x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
                     3'b100: $display("XORI   x%0d, x%0d, %0d",inst_x[11:7], inst_x[19:15], dut.execute.imm);
@@ -209,31 +168,53 @@ module dut;
             end
             `CCC: begin
                 //$write("Detected a CCC opcode\n");
-                if(inst_x[31:7] == 25'd0) begin $display("ECALL  \n Clock cycles to complete: %d", counter); #5 $finish; end
+                if(inst_x[31:7] == 25'd0) begin $display("ECALL  \n Clock cycles to complete: %d", counter);
+                    $display("Contents of regfile: ");
+                    for (i=0;i<32;i++) begin
+                        $display("r%0d = %0x", i, dut.reg_file.user_reg[i]);
+                    end
+                    #5 $finish; 
+                    
+                end
                 else $display("Looks an ECALL but doesn't match what I expected: %b", inst_x);
 
             end
             default: begin $display(" error"); end
 
         endcase
-        $display("Value of execute.rs1 = %0x", dut.execute.ALU_in1);
+        if(rs1_bypass == `MX) begin
+            $display("MX bypass into ALU_in1 from instruction at PC=%x", dut.mem_stage.PC_m);
+        end
+        else if (rs1_bypass == `WX) begin
+            $display("MX bypass into ALU_in1 from instruction at PC=%x", dut.mem_stage.PC_m + 4);
+        end
+        if(rs2_bypass == `MX) begin
+            $display("MX bypass into ALU_in2 from instruction at PC=%x", dut.mem_stage.PC_m);
+        end
+        else if (rs2_bypass == `WX) begin
+            $display("MX bypass into ALU_in2 from instruction at PC=%x", dut.mem_stage.PC_m + 4);
+        end
+
+        if(stall) begin
+            $display("Instruction at %x stalling to wait for dependant data to reach a stage where it can be read", PC_d);
+        end
+
+        if(kill_dx) begin
+            $display("Instruction at %x breaks execution flow, squashing bubble", PC_x);
+        end
+
+        if(dut.WB.addr_rd == 5'd2 && dut.WB.wb_w== 32'h0101_1111) begin // we only write the base stack address when returning the program so we can exit
+            #10 $display("Returning to SP at end of memory, terminating simulation after %0d cycles", counter);
+            
+            $display("Contents of regfile: ");
+            for (i=0;i<32;i++) begin
+                $display("r%0d = 0x%0x", i, dut.reg_file.user_reg[i]);
+            end
+            $finish;
+        end
 
         $write("\n--------------------------------------\n"); 
-    
-
     end 
-
-    // task decode_jType;
-    //     begin
-    //         imm[31:21] <= {11{inst_x[31]}};
-    //         imm[19:12] <= inst_x[19:12];
-    //         imm[11] <= inst_x[20];
-    //         imm[10:1] <= inst_x[30:21];
-    //         imm[20] <= inst_x[31];
-    //     end
-    // endtask
-
-
 
     wire [6:0] inst_x_opcode = inst_x[6:0];
     wire [6:0] inst_d_opcode = inst_d[6:0];
@@ -256,41 +237,73 @@ module dut;
     wire [4:0] inst_w_addr_rd = inst_w[11:7];
 
 
-    assign WM_bypass = (inst_m_addr_rs2==inst_w_addr_rd) ? 1:0;
+    assign WM_bypass = (inst_m_addr_rs2==inst_w_addr_rd && inst_m_addr_rs2 != 5'b0 ) ? 1:0;
     
-
+    //I put this in an always block because the logic is so deep I can just structure it better
     always @(*) begin
         //I don't have bypass into the Branch comparator so need to stall decode in all branches where either rs1 or rs2 is still in the pipeline.
-       if (
-           //stall if WB has value
-           ((inst_d_opcode != `LUI && inst_d_opcode != `AUIPC && inst_d_opcode != `JAL) && 
-           ((inst_d_addr_rs1 == inst_w_addr_rd || inst_d_addr_rs2 == inst_w_addr_rd) && inst_w_addr_rd != 5'b0)) || 
-            
-            // stall if memory has value
-           ((inst_d_opcode == `BCC || inst_d_opcode == `SCC) && 
-           ((inst_d_addr_rs1 == inst_m_addr_rd ||inst_d_addr_rs2 == inst_m_addr_rd) && inst_m_addr_rd != 5'b0)) || 
-            
-            // stall if execute has value (maybe I can make these only for BCCs since they're the ones that can't get bypass input, but also r2 can't get from bypass on a store)
-           (
-               (inst_d_opcode == `BCC || inst_x_opcode == `LCC ||  inst_d_opcode == `SCC) && 
+        if (
+           //stall if WB has value 
+           //   -once D insn gets to X WB the data will be back in the reg, not in the pipeline so wait 1 cycle until the wb has completed)
+            (
                 (
+                   (inst_d_opcode != `LUI && inst_d_opcode != `AUIPC && inst_d_opcode != `JAL) && 
+                    ((inst_d_addr_rs1 == inst_w_addr_rd || inst_d_addr_rs2 == inst_w_addr_rd) && inst_w_addr_rd != 5'b0)
+                ) || 
+            //or if memory has value 
+            //  -don't care about LCC in this case because if rs2 data is in M it will be in WB when the insn gets to X so it can be bypassed via WM bypass
+                // || inst_d_opcode == `SCC)
+                (
+                    (inst_d_opcode == `BCC ) && 
+                    ((inst_d_addr_rs1 == inst_m_addr_rd ||inst_d_addr_rs2 == inst_m_addr_rd) && inst_m_addr_rd != 5'b0)
+                ) ||
+                //need to stall if rs2 value is 2 steps ahead, because once inst_d reaches M rs2 will have cleared the pipeline already
+                // rendering bypass unusable 
+                (
+                    (inst_d_opcode == `SCC) && 
+                    (inst_d_addr_rs2 == inst_m_addr_rd) && inst_m_addr_rd != 5'b0
+                ) ||
+            
+            // or execute has value
+            //  -bypass handles this issue if any insn that uses the ALU, however BCC, LCC, and SCC must wait for the result to wb before they get decoded
+                (
+                    (inst_d_opcode == `BCC || inst_x_opcode == `LCC) && 
                     (
-                    inst_d_addr_rs1 == inst_x_addr_rd || 
-                    inst_d_addr_rs2 == inst_x_addr_rd
-                    ) && inst_x_addr_rd != 5'b0)
-            ) 
-            ) 
-            stall = 1; 
+                        (
+                            inst_d_addr_rs1 == inst_x_addr_rd || 
+                            inst_d_addr_rs2 == inst_x_addr_rd
+                        ) && inst_x_addr_rd != 5'b0
+                    )     
+                ) 
+                // ||
+                // (
+                //     ( inst_d_opcode == `LCC) && 
+                //     (
+                //         (
+                //             inst_d_addr_rs2 == inst_x_addr_rd
+                //         ) && inst_x_addr_rd != 5'b0
+                //     )     
+                // ) 
+            // || 
+            // // in SCCs or LCCs we only need to stall if write back has the value since it'll be out of the pipeline before we can use it. 
+            //     (
+            //         (inst_d_opcode == `SCC ||  inst_x_opcode == `LCC) && 
+            //         ( 
+            //             inst_d_addr_rs1 == inst_x_addr_rd
+            //         )
+            //     )
+           ) && !kill_dx 
+        ) stall = 1; 
 
         else stall = 0;
 
     
     end
 
-    assign hazard_mux_out = (stall)? 32'h13 : inst_d;
+    assign hazard_mux_out = (stall)? `NOP : inst_d;
 
     always @(*) begin
-        if (inst_x_addr_rs1 == inst_m_addr_rd && inst_m_addr_rd != 5'b0 && inst_m_opcode!=`BCC &&inst_m_opcode != `LCC && inst_m_opcode != `SCC) rs1_bypass <= `MX;
+        if (inst_x_addr_rs1 == inst_m_addr_rd && inst_m_addr_rd != 5'b0 && inst_m_opcode!=`BCC && inst_m_opcode != `LCC && inst_m_opcode != `SCC) rs1_bypass <= `MX;
         else if (inst_x_addr_rs1 == inst_w_addr_rd && (inst_w_addr_rd != 5'b0) && (inst_w_opcode != `SCC) && (inst_w_opcode!=`BCC) ) rs1_bypass <= `WX;
         //                                                                  | added this stuff because if the wb insn ins't writing back then we don't need to bypass | 
         else rs1_bypass <= `NONE;
@@ -300,25 +313,21 @@ module dut;
         else rs2_bypass <= `NONE;
 
     end
-    // always @(*) begin
-    //     if (inst_x[19:15] == inst_m[11:7] && inst_m[11:7] != 5'b0 && inst_m[6:0]!=`BCC && inst_m[6:0] != `LCC && inst_m[6:0] != `SCC) rs1_bypass <= `MX;
-    //     else if (inst_x[19:15] == inst_w[11:7] && (inst_w[11:7] != 5'b0) && (inst_w[6:0] != `SCC) && (inst_w[6:0]!=`BCC) ) rs1_bypass <= `WX;
-    //     //                                                                  | added this stuff because if the wb insn ins't writing back then we don't need to bypass | 
-    //     else rs1_bypass <= `NONE;
-
-    //     if (inst_x[24:20] == inst_m[11:7] && inst_m[11:7] != 5'b0  && inst_m[6:0] != `SCC) rs2_bypass <= `MX;
-    //     else if (inst_x[24:20] == inst_w[11:7] && inst_w[11:7] != 5'b0) rs2_bypass <= `WX;
-    //     else rs2_bypass <= `NONE;
-
-    // end
-
 
     fetch       fetch_stage(.clk(clk), .PCSel(PCSel), .stall(stall), .alu_x(alu_x), .PC_f(PC_f));
 
-    memory      i_mem (.clk(clk), .address(PC_f), .data_in(32'd0), .w_enable(1'b0), .access_size(`WORD), .RdUn(1'b0), .data_out(inst_f));
+    memory      i_mem (
+        //inputs
+        .clk(clk),
+        .address(PC_f), 
+        .data_in(32'd0), 
+        .w_enable(1'b0), 
+        .access_size(`WORD), 
+        .RdUn(1'b0),
+        //outputs 
+        .data_out(inst_f)
+        );
        
-    
-    
     decode decode_stage(
         //inputs
         .clk(clk),
@@ -416,15 +425,15 @@ module fetch(clk, PCSel, stall, alu_x, PC_f);
         PC_f <= 32'h01000000 - 4;
     end
 
+    // only need to stall if we're not poppping the bubble, this solves some issues I was having when a jump is made at the same time as a stall occurs
     always@(posedge clk) begin
 
-        // freeze the PC_f reg if we're stalling else proceed as PCSel says
-        if(!stall) begin 
-            if(PCSel)
+        if(PCSel)
                 PC_f <= alu_x;
             else 
+                if(!stall) begin 
                 //if we do this we need to nop out the fetch and decode stage
-                PC_f <= PC_f + 4;
+                    PC_f <= PC_f + 4;
         end
 
     end
@@ -446,6 +455,7 @@ module WB_stage(clk, wb_m, inst_m, wb_w, inst_w, RegWE, addr_rd);
     assign addr_rd = inst_w[11:7];
     assign opcode = inst_w[6:0];
 
+    // WB = True for all insns except branches and stores
     assign RegWE = (opcode == `BCC || opcode == `SCC)? 0 : 1;
 
     always@(posedge clk) begin

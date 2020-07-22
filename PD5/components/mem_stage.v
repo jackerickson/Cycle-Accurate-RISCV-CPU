@@ -50,6 +50,8 @@ module mem_stage(
     end
 
     //WBMux
+    //  - only wb from mem when insn is LCC
+    //  - wb from PC only on J insns
     always @(*) begin
         case(inst_m[6:0])
             `LCC:  wb_m = d_mem_out;
@@ -58,7 +60,8 @@ module mem_stage(
         endcase
     end 
 
-    // DMEM access control 
+    // DMEM access size mux
+    //  - use funct3 to determine access size since for non SCC or LCC insns it doesn't matter what happens
     always @(*) begin
         case(funct3)
             3'b000, 3'b100: access_size = `BYTE;

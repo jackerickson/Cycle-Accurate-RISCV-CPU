@@ -133,7 +133,7 @@ Disassembly of section .text:
  10001e4:	00c12683          	lw	x13,12(x2)
  10001e8:	00f687b3          	add	x15,x13,x15
  10001ec:	0007a783          	lw	x15,0(x15)
- 10001f0:	00e7d863          	bge	x15,x14,1000200 <test+0x5c>
+ 10001f0:	00e7d863          	bge	x15,x14,1000200 <test+0x5c> // this is a good example of load use delay for branches
  10001f4:	048000ef          	jal	x1,100023c <fail>
  10001f8:	00050793          	addi	x15,x10,0
  10001fc:	0240006f          	jal	x0,1000220 <test+0x7c>

@@ -33,11 +33,6 @@
 `define WX      2'd1
 `define NONE    2'd2
 
-// //WBSel options
-// `define MEM     2'd0
-// `define ALU     2'd1
-// `define PC_NEXT 2'd2
-
 //Access size
 `define BYTE    2'd0
 `define HALFWORD 2'd1

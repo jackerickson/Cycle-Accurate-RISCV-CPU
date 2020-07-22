@@ -10,17 +10,7 @@ module reg_file(
     );
 
     reg [31:0]user_reg[0:31]; // 2^5, 32b registers in the regfile
-    wire [31:0] reg30;
-    wire [31:0] reg29;
-    wire [31:0] reg1;
-    wire [31:0] reg4;
-    wire [31:0] reg10;
 
-    assign reg30 = user_reg[30];
-    assign reg29 = user_reg[29];
-    assign reg1 = user_reg[1];
-    assign reg4 = user_reg[4];
-    assign reg10 = user_reg[10];
     wire [31:0] out [0:31];
     // //setup var
     integer i;
@@ -35,7 +25,7 @@ module reg_file(
         user_reg[0] = 0;
         $display("Initial Contents of regfile: ");
         for (i=0;i<32;i++) begin
-            $display("r%0d = %0x", i, user_reg[i]);
+            $display("r%0d = 0x%0x", i, user_reg[i]);
         end
     end
     

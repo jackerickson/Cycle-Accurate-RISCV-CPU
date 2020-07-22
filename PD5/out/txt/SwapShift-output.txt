@@ -1,0 +1,526 @@
+Start: SwapShift.x
+WARNING: components/memory.v:37: $readmemh(temp.x): Not enough words in the file for the requested range [0:262143].
+Initial Contents of regfile: 
+r0 = 0x0
+r1 = 0x0
+r2 = 0x1011111
+r3 = 0x0
+r4 = 0x0
+r5 = 0x0
+r6 = 0x0
+r7 = 0x0
+r8 = 0x0
+r9 = 0x0
+r10 = 0x0
+r11 = 0x0
+r12 = 0x0
+r13 = 0x0
+r14 = 0x0
+r15 = 0x0
+r16 = 0x0
+r17 = 0x0
+r18 = 0x0
+r19 = 0x0
+r20 = 0x0
+r21 = 0x0
+r22 = 0x0
+r23 = 0x0
+r24 = 0x0
+r25 = 0x0
+r26 = 0x0
+r27 = 0x0
+r28 = 0x0
+r29 = 0x0
+r30 = 0x0
+r31 = 0x0
+WARNING: components/memory.v:37: $readmemh(temp.x): Not enough words in the file for the requested range [0:262143].
+VCD info: dumpfile testbench.vcd opened for output.
+xxxxxxxx:  	xxxxxxxx    	 error
+
+--------------------------------------
+xxxxxxxx:  	xxxxxxxx    	 error
+
+--------------------------------------
+Error in ALU mux x
+00fffffc:  	00000013    	NOP
+
+--------------------------------------
+01000000:  	fe010113    	ADDI   x2, x2, 4294967264
+
+--------------------------------------
+01000004:  	00112e23    	SW     x1, 28(x2)
+MX bypass into ALU_in1 from instruction at PC=01000000
+
+--------------------------------------
+01000008:  	00500793    	ADDI   x15, x0, 5
+Instruction at 0100000c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100000c:  	00000013    	NOP
+Instruction at 0100000c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100000c:  	00000013    	NOP
+Instruction at 0100000c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100000c:  	00000013    	NOP
+
+--------------------------------------
+0100000c:  	00f12223    	SW     x15, 4(x2)
+
+--------------------------------------
+01000010:  	00900793    	ADDI   x15, x0, 9
+
+--------------------------------------
+01000014:  	00f12023    	SW     x15, 0(x2)
+MX bypass into ALU_in2 from instruction at PC=01000010
+
+--------------------------------------
+01000018:  	00012783    	LW     x15, 0(x2)
+Instruction at 0100001c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100001c:  	00000013    	NOP
+
+--------------------------------------
+0100001c:  	00279793    	SLLI   x15, x15, 0x2
+MX bypass into ALU_in1 from instruction at PC=01000020
+Instruction at 01000020 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000020:  	00000013    	NOP
+Instruction at 01000020 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000020:  	00000013    	NOP
+Instruction at 01000020 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000020:  	00000013    	NOP
+
+--------------------------------------
+01000020:  	00f12023    	SW     x15, 0(x2)
+
+--------------------------------------
+01000024:  	00412783    	LW     x15, 4(x2)
+Instruction at 01000028 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000028:  	00000013    	NOP
+
+--------------------------------------
+01000028:  	4017d793    	SRAI     x15, 15 ,x1)
+MX bypass into ALU_in1 from instruction at PC=0100002c
+Instruction at 0100002c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100002c:  	00000013    	NOP
+Instruction at 0100002c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100002c:  	00000013    	NOP
+Instruction at 0100002c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100002c:  	00000013    	NOP
+
+--------------------------------------
+0100002c:  	00f12223    	SW     x15, 4(x2)
+
+--------------------------------------
+01000030:  	00410793    	ADDI   x15, x2, 4
+
+--------------------------------------
+01000034:  	00f12623    	SW     x15, 12(x2)
+MX bypass into ALU_in2 from instruction at PC=01000030
+
+--------------------------------------
+01000038:  	00010793    	ADDI   x15, x2, 0
+Instruction at 0100003c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100003c:  	00000013    	NOP
+Instruction at 0100003c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100003c:  	00000013    	NOP
+Instruction at 0100003c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100003c:  	00000013    	NOP
+
+--------------------------------------
+0100003c:  	00f12423    	SW     x15, 8(x2)
+
+--------------------------------------
+01000040:  	00812583    	LW     x11, 8(x2)
+
+--------------------------------------
+01000044:  	00c12503    	LW     x10, 12(x2)
+
+--------------------------------------
+01000048:  	044000ef    	JAL    x1, 100008c
+Instruction at 01000048 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+0100008c:  	fe010113    	ADDI   x2, x2, 4294967264
+
+--------------------------------------
+01000090:  	00a12623    	SW     x10, 12(x2)
+MX bypass into ALU_in1 from instruction at PC=0100008c
+
+--------------------------------------
+01000094:  	00b12423    	SW     x11, 8(x2)
+MX bypass into ALU_in1 from instruction at PC=01000094
+Instruction at 01000098 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000098:  	00000013    	NOP
+Instruction at 01000098 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000098:  	00000013    	NOP
+
+--------------------------------------
+01000098:  	00c12783    	LW     x15, 12(x2)
+Instruction at 0100009c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100009c:  	00000013    	NOP
+
+--------------------------------------
+0100009c:  	0007a783    	LW     x15, 0(x15)
+MX bypass into ALU_in1 from instruction at PC=010000a0
+Instruction at 010000a0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000a0:  	00000013    	NOP
+Instruction at 010000a0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000a0:  	00000013    	NOP
+Instruction at 010000a0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000a0:  	00000013    	NOP
+
+--------------------------------------
+010000a0:  	00f12e23    	SW     x15, 28(x2)
+
+--------------------------------------
+010000a4:  	00812783    	LW     x15, 8(x2)
+Instruction at 010000a8 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000a8:  	00000013    	NOP
+
+--------------------------------------
+010000a8:  	0007a703    	LW     x14, 0(x15)
+MX bypass into ALU_in1 from instruction at PC=010000ac
+
+--------------------------------------
+010000ac:  	00c12783    	LW     x15, 12(x2)
+Instruction at 010000b0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000b0:  	00000013    	NOP
+Instruction at 010000b0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000b0:  	00000013    	NOP
+Instruction at 010000b0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000b0:  	00000013    	NOP
+
+--------------------------------------
+010000b0:  	00e7a023    	SW     x14, 0(x15)
+
+--------------------------------------
+010000b4:  	00812783    	LW     x15, 8(x2)
+
+--------------------------------------
+010000b8:  	01c12703    	LW     x14, 28(x2)
+Instruction at 010000bc stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000bc:  	00000013    	NOP
+Instruction at 010000bc stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000bc:  	00000013    	NOP
+Instruction at 010000bc stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000bc:  	00000013    	NOP
+
+--------------------------------------
+010000bc:  	00e7a023    	SW     x14, 0(x15)
+
+--------------------------------------
+010000c0:  	00000013    	NOP
+
+--------------------------------------
+010000c4:  	02010113    	ADDI   x2, x2, 32
+
+--------------------------------------
+010000c8:  	00008067    	JALR   x0, 0(x1)
+Instruction at 010000c8 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+0100004c:  	00c12783    	LW     x15, 12(x2)
+Instruction at 01000050 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000050:  	00000013    	NOP
+
+--------------------------------------
+01000050:  	0007a783    	LW     x15, 0(x15)
+MX bypass into ALU_in1 from instruction at PC=01000054
+Instruction at 01000054 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000054:  	00000013    	NOP
+Instruction at 01000054 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000054:  	00000013    	NOP
+Instruction at 01000054 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000054:  	00000013    	NOP
+
+--------------------------------------
+01000054:  	00f12223    	SW     x15, 4(x2)
+
+--------------------------------------
+01000058:  	00812783    	LW     x15, 8(x2)
+Instruction at 0100005c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100005c:  	00000013    	NOP
+
+--------------------------------------
+0100005c:  	0007a783    	LW     x15, 0(x15)
+MX bypass into ALU_in1 from instruction at PC=01000060
+Instruction at 01000060 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000060:  	00000013    	NOP
+Instruction at 01000060 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000060:  	00000013    	NOP
+Instruction at 01000060 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000060:  	00000013    	NOP
+
+--------------------------------------
+01000060:  	00f12023    	SW     x15, 0(x2)
+
+--------------------------------------
+01000064:  	00412703    	LW     x14, 4(x2)
+
+--------------------------------------
+01000068:  	00012783    	LW     x15, 0(x2)
+Instruction at 0100006c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100006c:  	00000013    	NOP
+Instruction at 0100006c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100006c:  	00000013    	NOP
+Instruction at 0100006c stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+0100006c:  	00000013    	NOP
+
+--------------------------------------
+0100006c:  	00f707b3    	ADD    x15, x14, x15
+
+--------------------------------------
+01000070:  	00078513    	ADDI   x10, x15, 0
+MX bypass into ALU_in1 from instruction at PC=0100006c
+
+--------------------------------------
+01000074:  	058000ef    	JAL    x1, 10000cc
+Instruction at 01000074 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+010000cc:  	fe010113    	ADDI   x2, x2, 4294967264
+
+--------------------------------------
+010000d0:  	00112e23    	SW     x1, 28(x2)
+MX bypass into ALU_in1 from instruction at PC=010000cc
+
+--------------------------------------
+010000d4:  	00a12623    	SW     x10, 12(x2)
+MX bypass into ALU_in1 from instruction at PC=010000d4
+Instruction at 010000d8 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000d8:  	00000013    	NOP
+
+--------------------------------------
+010000d8:  	00c12703    	LW     x14, 12(x2)
+MX bypass into ALU_in2 from instruction at PC=010000dc
+
+--------------------------------------
+010000dc:  	02600793    	ADDI   x15, x0, 38
+Instruction at 010000e0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000e0:  	00000013    	NOP
+Instruction at 010000e0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000e0:  	00000013    	NOP
+Instruction at 010000e0 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+010000e0:  	00000013    	NOP
+
+--------------------------------------
+010000e0:  	00f71863    	BNE    x14, x15, 10000f0
+
+--------------------------------------
+010000e4:  	024000ef    	JAL    x1, 1000108
+Instruction at 010000e4 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+Instruction at 01000108 stalling to wait for dependant data to reach a stage where it can be read
+
+--------------------------------------
+01000108:  	00000013    	NOP
+
+--------------------------------------
+01000108:  	00100793    	ADDI   x15, x0, 1
+
+--------------------------------------
+0100010c:  	00078513    	ADDI   x10, x15, 0
+MX bypass into ALU_in1 from instruction at PC=01000108
+
+--------------------------------------
+01000110:  	00008067    	JALR   x0, 0(x1)
+Instruction at 01000110 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+010000e8:  	00050793    	ADDI   x15, x10, 0
+
+--------------------------------------
+010000ec:  	00c0006f    	JAL    x0, 10000f8
+Instruction at 010000ec breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+010000f8:  	00078513    	ADDI   x10, x15, 0
+
+--------------------------------------
+010000fc:  	01c12083    	LW     x1, 28(x2)
+
+--------------------------------------
+01000100:  	02010113    	ADDI   x2, x2, 32
+
+--------------------------------------
+01000104:  	00008067    	JALR   x0, 0(x1)
+MX bypass into ALU_in1 from instruction at PC=01000104
+Instruction at 01000104 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+00000000:  	00000013    	NOP
+
+--------------------------------------
+01000078:  	00050793    	ADDI   x15, x10, 0
+
+--------------------------------------
+0100007c:  	00078513    	ADDI   x10, x15, 0
+MX bypass into ALU_in1 from instruction at PC=01000078
+
+--------------------------------------
+01000080:  	01c12083    	LW     x1, 28(x2)
+
+--------------------------------------
+01000084:  	02010113    	ADDI   x2, x2, 32
+
+--------------------------------------
+01000088:  	00008067    	JALR   x0, 0(x1)
+MX bypass into ALU_in1 from instruction at PC=01000088
+Instruction at 01000088 breaks execution flow, squashing bubble
+
+--------------------------------------
+00000000:  	00000013    	NOP
+Returning to SP at end of memory, terminating simulation after 128 cycles
+Contents of regfile: 
+r0 = 0x0
+r1 = 0x0
+r2 = 0x1011111
+r3 = 0x0
+r4 = 0x0
+r5 = 0x0
+r6 = 0x0
+r7 = 0x0
+r8 = 0x0
+r9 = 0x0
+r10 = 0x1
+r11 = 0x10110f1
+r12 = 0x0
+r13 = 0x0
+r14 = 0x26
+r15 = 0x1
+r16 = 0x0
+r17 = 0x0
+r18 = 0x0
+r19 = 0x0
+r20 = 0x0
+r21 = 0x0
+r22 = 0x0
+r23 = 0x0
+r24 = 0x0
+r25 = 0x0
+r26 = 0x0
+r27 = 0x0
+r28 = 0x0
+r29 = 0x0
+r30 = 0x0
+r31 = 0x0
+
+End:  SwapShift.x

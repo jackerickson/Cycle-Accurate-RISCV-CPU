@@ -1,8 +1,8 @@
 // `define mem_size 1048576 //Bytes
 
-`define source "components/simple-programs/SimpleAdd.x" //Binary file to load Memory from
-// `define source "components/individual-instructions/rv32ui-p-srai.x" 
-// `define source "temp.x" //used for batch running so I can run multiple tests at once
+`define source "components/simple-programs/SumArray.x" //Binary file to load Memory from
+// `define source "components/individual-instructions/rv32ui-p-jal.x" 
+`define source "temp.x" //used for batch running so I can run multiple tests at once
 `define relevant_addr 32'h010002c4
 module memory(
     input clk,
@@ -96,7 +96,7 @@ module memory(
             endcase
         end
         else begin
-            data_out = 32'hBADB_ADFF;
+            data_out = `NOP;
             //$display("Address %x out of range (%x - %x) writing 0", address, start_address, start_address+mem_size);
         end
         

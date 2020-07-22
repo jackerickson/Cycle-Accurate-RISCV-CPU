@@ -32,7 +32,7 @@ module decode(
     //change to posedge clk for pipelined
     always@(posedge clk) begin
         
-        // if we're stalling we need to disable WE in the PC_d and inst_d register
+        // if we're stalling we need to disable WE in the PC_d and inst_d registers
 
         if(!stall) begin
             //also check for kill_dx which will set PC_d to 0 and inst_d to NOP
@@ -49,7 +49,6 @@ module decode(
             inst_d <= inst_d;
             PC_d <= PC_d;
         end
-
     end
 
 endmodule

@@ -5,14 +5,9 @@ module alu(
     //these make up the ALUsel mux selector    
     output [31:0] alu_res);
 
-    ////!!!!!!!!!!!!!!!MAKE SURE BREQ AND BRLT ARE ASSIGNED IN BLOCKING STATEMENTS
     reg [31:0] alu_res;
 
-
-
     always@(*) begin
-        //FOR R-TYPE instructions
-        //set up a decoder for funct3 and funct7 to select what kind of operation the alu should do to it's inputs
         case (ALUsel)
             `ADD: alu_res = $signed(rs1) + $signed(rs2); 
             `AND: alu_res = rs1 & rs2;
